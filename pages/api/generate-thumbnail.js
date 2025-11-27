@@ -3,6 +3,7 @@
 
 const axios = require('axios');
 const { getConfigValue } = require('../../lib/config');
+const { compressBase64Image } = require('../../lib/image-utils');
 
 /**
  * Gemini 2.0 Flash로 AI 이미지 생성 (generateContent + responseModalities)
@@ -49,7 +50,7 @@ async function generateImageWithGemini(postTitle, thumbnailPrompt) {
             if (part.inlineData?.mimeType?.startsWith('image/')) {
               const base64Image = part.inlineData.data;
               console.log(`[INFO] ${model} 이미지 생성 성공`);
-              return `data:${part.inlineData.mimeType};base64,${base64Image}`;
+              return await compressBase64Image(base64Image, part.inlineData.mimeType);
             }
           }
         }
