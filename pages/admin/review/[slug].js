@@ -107,7 +107,7 @@ export default function ReviewPost({ post }) {
 
 export async function getServerSideProps({ params }) {
   const { slug } = params;
-  const drafts = getDraftPosts();
+  const drafts = await getDraftPosts();
   const post = drafts.find((p) => p.slug === slug);
 
   console.log('[Review] Slug:', slug);
