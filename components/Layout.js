@@ -1,8 +1,7 @@
 // components/Layout.js
-// 보담 - 공통 레이아웃 컴포넌트
+// 토스/뱅크샐러드 스타일 레이아웃
 
 import Head from 'next/head';
-import { useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import Link from 'next/link';
 
@@ -89,67 +88,65 @@ export default function Layout({
         }}
       />
 
-      <div className="min-h-screen flex flex-col bg-gray-50">
+      <div className="min-h-screen flex flex-col bg-white">
         <Navbar />
         <main className="flex-grow">{children}</main>
 
-        {/* 푸터 */}
-        <footer className="bg-gray-900 text-white mt-16">
-          <div className="container-custom py-12">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        {/* 푸터 - 미니멀 */}
+        <footer className="bg-gray-50 border-t border-gray-100 mt-16">
+          <div className="max-w-5xl mx-auto px-4 py-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
               {/* 브랜드 */}
-              <div className="md:col-span-1">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">보</span>
+              <div className="col-span-2 md:col-span-1">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-7 h-7 bg-gray-900 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-xs">보</span>
                   </div>
-                  <span className="text-xl font-bold">보담</span>
+                  <span className="font-bold text-gray-900">보담</span>
                 </div>
-                <p className="text-gray-400 text-sm leading-relaxed">
+                <p className="text-sm text-gray-500 leading-relaxed">
                   손해사정사가 직접 알려주는<br />
                   보험금 청구의 모든 것
                 </p>
               </div>
 
-              {/* 카테고리 */}
+              {/* 보험 정보 */}
               <div>
-                <h4 className="font-semibold mb-4 text-emerald-400">보험 정보</h4>
-                <ul className="space-y-2 text-sm">
-                  <li><Link href="/category/auto" className="text-gray-400 hover:text-emerald-400 transition-colors">자동차보험</Link></li>
-                  <li><Link href="/category/health" className="text-gray-400 hover:text-emerald-400 transition-colors">실손보험</Link></li>
-                  <li><Link href="/category/life" className="text-gray-400 hover:text-emerald-400 transition-colors">생명/건강보험</Link></li>
-                  <li><Link href="/category/property" className="text-gray-400 hover:text-emerald-400 transition-colors">재물/화재보험</Link></li>
+                <h4 className="font-medium text-gray-900 mb-3 text-sm">보험 정보</h4>
+                <ul className="space-y-2">
+                  <li><Link href="/category/auto" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">자동차보험</Link></li>
+                  <li><Link href="/category/health" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">실손보험</Link></li>
+                  <li><Link href="/category/life" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">생명/건강보험</Link></li>
+                  <li><Link href="/category/property" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">재물/화재보험</Link></li>
                 </ul>
               </div>
 
               {/* 서비스 */}
               <div>
-                <h4 className="font-semibold mb-4 text-emerald-400">서비스</h4>
-                <ul className="space-y-2 text-sm">
-                  <li><Link href="/category/dispute" className="text-gray-400 hover:text-emerald-400 transition-colors">분쟁해결 가이드</Link></li>
-                  <li><Link href="/category/cases" className="text-gray-400 hover:text-emerald-400 transition-colors">실제 사례</Link></li>
-                  <li><Link href="/category/tools" className="text-gray-400 hover:text-emerald-400 transition-colors">보험금 진단</Link></li>
-                  <li><Link href="/contact" className="text-gray-400 hover:text-emerald-400 transition-colors">무료 상담</Link></li>
+                <h4 className="font-medium text-gray-900 mb-3 text-sm">서비스</h4>
+                <ul className="space-y-2">
+                  <li><Link href="/category/cases" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">실제 사례</Link></li>
+                  <li><Link href="/quiz" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">보험금 진단</Link></li>
+                  <li><Link href="/contact" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">무료 상담</Link></li>
                 </ul>
               </div>
 
-              {/* 법적 고지 */}
+              {/* 정보 */}
               <div>
-                <h4 className="font-semibold mb-4 text-emerald-400">정보</h4>
-                <ul className="space-y-2 text-sm">
-                  <li><Link href="/about" className="text-gray-400 hover:text-emerald-400 transition-colors">소개</Link></li>
-                  <li><Link href="/privacy" className="text-gray-400 hover:text-emerald-400 transition-colors">개인정보처리방침</Link></li>
-                  <li><Link href="/terms" className="text-gray-400 hover:text-emerald-400 transition-colors">이용약관</Link></li>
+                <h4 className="font-medium text-gray-900 mb-3 text-sm">정보</h4>
+                <ul className="space-y-2">
+                  <li><Link href="/about" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">소개</Link></li>
+                  <li><Link href="/privacy" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">개인정보처리방침</Link></li>
                 </ul>
               </div>
             </div>
 
-            <div className="border-t border-gray-700 pt-8">
-              <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                <p className="text-gray-400 text-sm">
+            <div className="pt-8 border-t border-gray-200">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-3">
+                <p className="text-sm text-gray-400">
                   © {new Date().getFullYear()} 보담. All rights reserved.
                 </p>
-                <p className="text-gray-500 text-xs">
+                <p className="text-xs text-gray-400">
                   본 사이트의 정보는 참고용이며, 구체적인 사안은 전문가 상담을 권장합니다.
                 </p>
               </div>

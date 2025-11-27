@@ -1,81 +1,75 @@
 // components/Navbar.js
-// 보담 - 메인 네비게이션 바
+// 보담 - 토스/뱅크샐러드 스타일 네비게이션
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { categories } from '../lib/categories';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const navItems = [
+    { name: '자동차보험', href: '/category/auto' },
+    { name: '실손보험', href: '/category/health' },
+    { name: '생명보험', href: '/category/life' },
+    { name: '사례', href: '/category/cases' },
+  ];
+
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50 border-b-2 border-emerald-500">
-      <div className="container-custom">
-        <div className="flex justify-between items-center h-16">
+    <nav className="bg-white sticky top-0 z-50 border-b border-gray-100">
+      <div className="max-w-5xl mx-auto px-4">
+        <div className="flex justify-between items-center h-14">
           {/* 로고 */}
-          <Link href="/">
-            <div className="flex items-center cursor-pointer gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">보</span>
-              </div>
-              <div>
-                <span className="text-xl font-bold text-gray-800">보담</span>
-                <span className="text-xs text-gray-500 block -mt-1">손해사정사의 보험 이야기</span>
-              </div>
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">보</span>
             </div>
+            <span className="text-lg font-bold text-gray-900">보담</span>
           </Link>
 
           {/* 데스크톱 메뉴 */}
-          <div className="hidden md:flex items-center space-x-1">
-            {categories.slice(0, 6).map((category) => (
+          <div className="hidden md:flex items-center gap-1">
+            {navItems.map((item) => (
               <Link
-                key={category.id}
-                href={category.id === 'all' ? '/' : `/category/${category.slug}`}
+                key={item.name}
+                href={item.href}
+                className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
               >
-                <span className="px-3 py-2 rounded-lg text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors cursor-pointer font-medium text-sm">
-                  {category.icon} {category.name}
-                </span>
+                {item.name}
               </Link>
             ))}
-            {/* 더보기 드롭다운 */}
-            <div className="relative group">
-              <span className="px-3 py-2 rounded-lg text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors cursor-pointer font-medium text-sm">
-                더보기 ▾
-              </span>
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                {categories.slice(6).map((category) => (
-                  <Link key={category.id} href={`/category/${category.slug}`}>
-                    <div className="px-4 py-3 hover:bg-emerald-50 text-gray-700 hover:text-emerald-600 cursor-pointer text-sm first:rounded-t-lg last:rounded-b-lg">
-                      {category.icon} {category.name}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
           </div>
 
-          {/* 상담 버튼 (데스크톱) */}
-          <Link href="/contact" className="hidden md:block">
-            <button className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium text-sm">
-              무료상담
-            </button>
-          </Link>
+          {/* 상담 버튼 */}
+          <div className="hidden md:flex items-center gap-3">
+            <Link
+              href="/quiz"
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              자가진단
+            </Link>
+            <Link href="/contact">
+              <button className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors">
+                무료상담
+              </button>
+            </Link>
+          </div>
 
           {/* 모바일 메뉴 버튼 */}
           <button
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="md:hidden p-2 -mr-2 rounded-lg hover:bg-gray-50 transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="메뉴"
           >
             <svg
-              className="w-6 h-6 text-gray-700"
+              className="w-5 h-5 text-gray-700"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
               {mobileMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
               ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
               )}
             </svg>
           </button>
@@ -84,29 +78,32 @@ export default function Navbar() {
 
       {/* 모바일 메뉴 */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200">
-          <div className="container-custom py-4 space-y-2">
-            {categories.map((category) => (
+        <div className="md:hidden bg-white border-t border-gray-100">
+          <div className="px-4 py-3 space-y-1">
+            {navItems.map((item) => (
               <Link
-                key={category.id}
-                href={category.id === 'all' ? '/' : `/category/${category.slug}`}
-              >
-                <div
-                  className="block px-4 py-3 rounded-lg text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors cursor-pointer"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {category.icon} {category.name}
-                </div>
-              </Link>
-            ))}
-            <Link href="/contact">
-              <div
-                className="block px-4 py-3 rounded-lg bg-emerald-500 text-white text-center font-medium"
+                key={item.name}
+                href={item.href}
+                className="block px-3 py-2.5 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                무료상담 신청
-              </div>
-            </Link>
+                {item.name}
+              </Link>
+            ))}
+            <div className="pt-2 border-t border-gray-100 mt-2">
+              <Link
+                href="/quiz"
+                className="block px-3 py-2.5 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                보험금 자가진단
+              </Link>
+              <Link href="/contact" onClick={() => setMobileMenuOpen(false)}>
+                <div className="mt-2 px-3 py-2.5 bg-gray-900 text-white text-center rounded-lg font-medium">
+                  무료 상담 신청
+                </div>
+              </Link>
+            </div>
           </div>
         </div>
       )}
