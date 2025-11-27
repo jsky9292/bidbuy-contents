@@ -1,38 +1,97 @@
 // pages/api/og.js
-// 동적 OG 이미지 생성
+// @vercel/og를 사용한 PNG OG 이미지 생성
 
-export default function handler(req, res) {
-  const { title = '보담' } = req.query;
+import { ImageResponse } from '@vercel/og';
 
-  // SVG를 반환
-  const svg = `
-    <svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#EFF6FF"/>
-          <stop offset="100%" style="stop-color:#FFFFFF"/>
-        </linearGradient>
-      </defs>
+export const config = {
+  runtime: 'edge',
+};
 
-      <!-- Background -->
-      <rect width="1200" height="630" fill="url(#bg)"/>
+export default async function handler(req) {
+  const { searchParams } = new URL(req.url);
+  const title = searchParams.get('title') || '보담';
+  const subtitle = searchParams.get('subtitle') || '손해사정사의 보험 이야기';
 
-      <!-- Logo -->
-      <rect x="520" y="150" width="160" height="160" rx="40" fill="#3B82F6"/>
-      <text x="600" y="260" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="white" text-anchor="middle">보</text>
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          height: '100%',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(135deg, #EFF6FF 0%, #FFFFFF 100%)',
+          fontFamily: 'sans-serif',
+        }}
+      >
+        {/* 로고 박스 */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 160,
+            height: 160,
+            borderRadius: 40,
+            backgroundColor: '#3B82F6',
+            marginBottom: 40,
+            boxShadow: '0 25px 50px -12px rgba(59, 130, 246, 0.4)',
+          }}
+        >
+          <span
+            style={{
+              fontSize: 80,
+              fontWeight: 'bold',
+              color: 'white',
+            }}
+          >
+            보
+          </span>
+        </div>
 
-      <!-- Site name -->
-      <text x="600" y="380" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#111827" text-anchor="middle">보담</text>
-
-      <!-- Subtitle -->
-      <text x="600" y="440" font-family="Arial, sans-serif" font-size="24" fill="#6B7280" text-anchor="middle">손해사정사의 보험 이야기</text>
-
-      <!-- Tagline -->
-      <text x="600" y="520" font-family="Arial, sans-serif" font-size="20" fill="#3B82F6" text-anchor="middle">보험사가 알려주지 않는 보험금 청구의 모든 것</text>
-    </svg>
-  `;
-
-  res.setHeader('Content-Type', 'image/svg+xml');
-  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-  res.status(200).send(svg);
+        {/* 타이틀 */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <span
+            style={{
+              fontSize: 56,
+              fontWeight: 'bold',
+              color: '#111827',
+              marginBottom: 16,
+            }}
+          >
+            {title}
+          </span>
+          <span
+            style={{
+              fontSize: 28,
+              color: '#6B7280',
+              marginBottom: 24,
+            }}
+          >
+            {subtitle}
+          </span>
+          <span
+            style={{
+              fontSize: 22,
+              color: '#3B82F6',
+            }}
+          >
+            보험사가 알려주지 않는 보험금 청구의 모든 것
+          </span>
+        </div>
+      </div>
+    ),
+    {
+      width: 1200,
+      height: 630,
+    }
+  );
 }
