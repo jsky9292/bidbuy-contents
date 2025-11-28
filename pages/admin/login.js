@@ -51,18 +51,19 @@ export default function AdminLogin() {
   return (
     <>
       <Head>
-        <title>관리자 로그인 | AI 잡학박사</title>
+        <title>관리자 로그인 | 보담</title>
         <meta name="robots" content="noindex, nofollow" />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
           {/* 로고 */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              🤖 AI 잡학박사
-            </h1>
-            <p className="text-gray-500 mt-2">관리자 로그인</p>
+            <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <span className="text-white font-bold text-2xl">보</span>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900">보담</h1>
+            <p className="text-gray-500 mt-1">관리자 로그인</p>
           </div>
 
           {/* 에러 메시지 */}
@@ -107,7 +108,7 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium rounded-lg hover:shadow-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full py-3 px-4 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 hover:shadow-lg transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {loading ? '로그인 중...' : '로그인'}
             </button>
@@ -115,8 +116,8 @@ export default function AdminLogin() {
 
           {/* 홈으로 링크 */}
           <div className="mt-6 text-center">
-            <a href="/" className="text-sm text-gray-500 hover:text-purple-600 transition-colors">
-              ← 블로그 홈으로 돌아가기
+            <a href="/" className="text-sm text-gray-500 hover:text-blue-600 transition-colors">
+              ← 홈으로 돌아가기
             </a>
           </div>
         </div>
