@@ -65,7 +65,7 @@ async function generateImageWithGemini(postTitle, thumbnailPrompt) {
   console.log('[INFO] 프롬프트:', imagePrompt);
 
   const response = await axios.post(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${GEMINI_API_KEY}`,
     {
       contents: [{ parts: [{ text: `Generate an image: ${imagePrompt}` }] }],
       generationConfig: { responseModalities: ['IMAGE'] }
