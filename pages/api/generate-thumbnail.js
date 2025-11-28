@@ -3,44 +3,7 @@
 
 const axios = require('axios');
 const { getConfigValue } = require('../../lib/config');
-const sharp = require('sharp');
-
-/**
- * imgbb에 이미지 업로드하고 URL 반환 (무료)
- */
-async function uploadToImgbb(base64Data) {
-  try {
-    const imageBuffer = Buffer.from(base64Data, 'base64');
-
-    // Sharp로 이미지 최적화
-    const optimizedBuffer = await sharp(imageBuffer)
-      .resize(1280, 720, { fit: 'cover' })
-      .jpeg({ quality: 80 })
-      .toBuffer();
-
-    const optimizedBase64 = optimizedBuffer.toString('base64');
-
-    // imgbb API로 업로드 (무료 API 키 사용)
-    const formData = new URLSearchParams();
-    formData.append('image', optimizedBase64);
-
-    const response = await axios.post(
-      'https://api.imgbb.com/1/upload?key=d36eb6591370ae7f9089d85875e56b22',
-      formData,
-      { timeout: 30000 }
-    );
-
-    if (response.data?.data?.url) {
-      console.log('[INFO] imgbb 업로드 성공:', response.data.data.url);
-      return response.data.data.url;
-    }
-
-    throw new Error('imgbb 응답 오류');
-  } catch (error) {
-    console.error('[ERROR] imgbb 업로드 실패:', error.message);
-    throw error;
-  }
-}
+const { compressBase64Image } = require('../../lib/image-utils');
 
 /**
  * Gemini 2.0 Flash로 AI 이미지 생성 (generateContent + responseModalities)
@@ -87,9 +50,7 @@ async function generateImageWithGemini(postTitle, thumbnailPrompt) {
             if (part.inlineData?.mimeType?.startsWith('image/')) {
               const base64Image = part.inlineData.data;
               console.log(`[INFO] ${model} 이미지 생성 성공`);
-
-              // imgbb에 업로드
-              return await uploadToImgbb(base64Image);
+              return await compressBase64Image(base64Image, part.inlineData.mimeType);
             }
           }
         }
