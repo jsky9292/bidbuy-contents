@@ -47,7 +47,7 @@ async function uploadToStorage(base64Data) {
 }
 
 /**
- * Gemini 2.0 Flash로 AI 이미지 생성 (generateContent + responseModalities)
+ * Gemini 2.0 Flash로 AI 이미지 생성
  */
 async function generateImageWithGemini(postTitle, thumbnailPrompt) {
   const GEMINI_API_KEY = getConfigValue('gemini_api_key');
@@ -56,57 +56,32 @@ async function generateImageWithGemini(postTitle, thumbnailPrompt) {
     throw new Error('Gemini API 키가 설정되지 않았습니다.');
   }
 
-  try {
-    console.log('[INFO] Gemini 이미지 생성 시작');
+  console.log('[INFO] Gemini 이미지 생성 시작');
 
-    const imagePrompt = (thumbnailPrompt ? `${thumbnailPrompt}, photorealistic, real photo, no text, no words, no letters, no writing on image` : `Professional modern blog thumbnail for: ${postTitle}. High quality, photorealistic real photo, no text, no words, no letters, 16:9 aspect ratio`);
+  const imagePrompt = thumbnailPrompt
+    ? `${thumbnailPrompt}, photorealistic, real photo, no text, no words, no letters`
+    : `Professional blog thumbnail for: ${postTitle}. High quality, photorealistic, 16:9`;
 
-    console.log('[INFO] 이미지 생성 프롬프트:', imagePrompt);
+  console.log('[INFO] 프롬프트:', imagePrompt);
 
-    // Gemini 이미지 생성 모델 시도
-    const models = ['gemini-2.5-flash-lite'];
-    let response;
-    let lastError;
+  const response = await axios.post(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      contents: [{ parts: [{ text: `Generate an image: ${imagePrompt}` }] }],
+      generationConfig: { responseModalities: ['IMAGE'] }
+    },
+    { timeout: 60000 }
+  );
 
-    for (const model of models) {
-      try {
-        console.log(`[INFO] ${model} 모델로 이미지 생성 시도...`);
-        response = await axios.post(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
-          {
-            contents: [{
-              parts: [{ text: `Generate an image: ${imagePrompt}` }]
-            }],
-            generationConfig: {
-              responseModalities: ['TEXT', 'IMAGE']
-            }
-          },
-          { timeout: 60000 }
-        );
-
-        // 이미지 응답 확인
-        if (response.data?.candidates?.[0]?.content?.parts) {
-          const parts = response.data.candidates[0].content.parts;
-          for (const part of parts) {
-            if (part.inlineData?.mimeType?.startsWith('image/')) {
-              const base64Image = part.inlineData.data;
-              console.log(`[INFO] ${model} 이미지 생성 성공`);
-              return await uploadToStorage(base64Image);
-            }
-          }
-        }
-        console.log(`[WARN] ${model}: 이미지 응답 없음`);
-      } catch (err) {
-        console.log(`[WARN] ${model} 실패:`, err.response?.data?.error?.message || err.message);
-        lastError = err;
-      }
+  const parts = response.data?.candidates?.[0]?.content?.parts || [];
+  for (const part of parts) {
+    if (part.inlineData?.mimeType?.startsWith('image/')) {
+      console.log('[INFO] Gemini 이미지 생성 성공');
+      return await uploadToStorage(part.inlineData.data);
     }
-
-    throw lastError || new Error('모든 Gemini 이미지 모델 실패');
-  } catch (error) {
-    console.error('[WARN] Gemini 이미지 생성 실패:', error.message);
-    throw error;
   }
+
+  throw new Error('이미지 응답 없음');
 }
 
 /**
