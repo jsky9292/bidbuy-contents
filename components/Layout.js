@@ -97,7 +97,8 @@ export default function Layout({
               <div>
                 <h4 className="font-medium text-gray-900 mb-3 text-sm">서비스</h4>
                 <ul className="space-y-2">
-                  <li><Link href="/category/cases" className="text-sm text-gray-500 hover:text-blue-500">실제 사례</Link></li>
+                  <li><Link href="/guides" className="text-sm text-gray-500 hover:text-blue-500">보험 가이드</Link></li>
+                  <li><Link href="/calculator" className="text-sm text-gray-500 hover:text-blue-500">합의금 계산기</Link></li>
                   <li><Link href="/quiz" className="text-sm text-gray-500 hover:text-blue-500">자가진단</Link></li>
                   <li><Link href="/contact" className="text-sm text-gray-500 hover:text-blue-500">무료 상담</Link></li>
                 </ul>
