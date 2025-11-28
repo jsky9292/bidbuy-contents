@@ -102,11 +102,11 @@ export default function CategoryPage({ posts, category, allCategories }) {
 }
 
 export async function getServerSideProps({ params }) {
-  const { getPublishedPostsByCategory } = require("../../lib/db");
+  const { getPublishedPostsByCategory, getPublishedPosts } = require("../../lib/db");
   const { slug } = params;
   const category = getCategoryBySlug(slug);
 
-  if (!category || category.id === 'all') {
+  if (!category) {
     return {
       redirect: {
         destination: '/',
@@ -116,7 +116,10 @@ export async function getServerSideProps({ params }) {
   }
 
   try {
-    const posts = await getPublishedPostsByCategory(category.id, 50, 0);
+    // 전체 카테고리면 모든 포스트 조회
+    const posts = category.id === 'all'
+      ? await getPublishedPosts(100, 0)
+      : await getPublishedPostsByCategory(category.id, 50, 0);
 
     return {
       props: {
