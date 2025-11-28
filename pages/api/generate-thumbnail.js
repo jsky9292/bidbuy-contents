@@ -2,11 +2,51 @@
 // Gemini Imagen API를 사용한 AI 썸네일 이미지 생성
 
 const axios = require('axios');
+const { createClient } = require('@supabase/supabase-js');
 const { getConfigValue } = require('../../lib/config');
-const { compressBase64Image } = require('../../lib/image-utils');
+const sharp = require('sharp');
+
+// Supabase 클라이언트
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 /**
- * Gemini 2.0 Flash로 AI 이미지 생성 (generateContent + responseModalities)
+ * Supabase Storage에 이미지 업로드
+ */
+async function uploadToStorage(base64Data) {
+  const imageBuffer = Buffer.from(base64Data, 'base64');
+
+  const optimizedBuffer = await sharp(imageBuffer)
+    .resize(1280, 720, { fit: 'cover' })
+    .jpeg({ quality: 80 })
+    .toBuffer();
+
+  const fileName = `thumb-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+
+  const { data, error } = await supabase.storage
+    .from('thumbnails')
+    .upload(fileName, optimizedBuffer, {
+      contentType: 'image/jpeg',
+      upsert: true
+    });
+
+  if (error) {
+    console.error('[ERROR] Storage 업로드 실패:', error);
+    throw error;
+  }
+
+  const { data: urlData } = supabase.storage
+    .from('thumbnails')
+    .getPublicUrl(fileName);
+
+  console.log('[INFO] Storage 업로드 성공:', urlData.publicUrl);
+  return urlData.publicUrl;
+}
+
+/**
+ * Gemini로 AI 이미지 생성 (원래 작동했던 코드)
  */
 async function generateImageWithGemini(postTitle, thumbnailPrompt) {
   const GEMINI_API_KEY = getConfigValue('gemini_api_key');
@@ -22,7 +62,7 @@ async function generateImageWithGemini(postTitle, thumbnailPrompt) {
 
     console.log('[INFO] 이미지 생성 프롬프트:', imagePrompt);
 
-    // Gemini 이미지 생성 모델 시도 (2.5 > 2.0 순서)
+    // 원래 사용했던 모델 (2.5 > 2.0 순서)
     const models = ['gemini-2.5-flash-image', 'gemini-2.0-flash-exp-image-generation'];
     let response;
     let lastError;
@@ -50,7 +90,8 @@ async function generateImageWithGemini(postTitle, thumbnailPrompt) {
             if (part.inlineData?.mimeType?.startsWith('image/')) {
               const base64Image = part.inlineData.data;
               console.log(`[INFO] ${model} 이미지 생성 성공`);
-              return await compressBase64Image(base64Image, part.inlineData.mimeType);
+              // Supabase Storage에 업로드하고 URL 반환
+              return await uploadToStorage(base64Image);
             }
           }
         }
@@ -72,9 +113,7 @@ async function generateImageWithGemini(postTitle, thumbnailPrompt) {
  * 영어 프롬프트에서 Unsplash 검색용 키워드 추출
  */
 function extractKeywordsFromPrompt(text) {
-  // 영어 프롬프트라면 주요 명사/형용사 추출
   const englishKeywords = text.match(/\b[a-zA-Z]{4,}\b/g) || [];
-  // 불용어 제거
   const stopWords = ['with', 'that', 'this', 'from', 'have', 'been', 'will', 'would', 'could', 'should', 'being', 'their', 'about', 'which', 'when', 'there', 'your', 'more', 'some', 'very', 'just', 'into', 'over', 'such', 'only', 'other', 'than', 'then', 'also', 'back', 'after', 'most', 'made', 'make', 'like', 'image', 'photo', 'style', 'aspect', 'ratio', 'high', 'quality', 'vibrant', 'colors', 'photorealistic', 'modern', 'professional'];
   const filtered = englishKeywords.filter(w => !stopWords.includes(w.toLowerCase()));
 
@@ -83,12 +122,11 @@ function extractKeywordsFromPrompt(text) {
     return filtered.slice(0, 3).join(',');
   }
 
-  // 영어 키워드가 충분하지 않으면 한글 키워드 추출
   return extractKeywords(text);
 }
 
 /**
- * Fallback: Unsplash API로 관련 이미지 검색 (한글 제목용)
+ * Fallback: Unsplash API로 관련 이미지 검색
  */
 function extractKeywords(title) {
   const keywordMap = {
@@ -130,7 +168,6 @@ function extractKeywords(title) {
 async function generateImageWithUnsplash(postTitle, thumbnailPrompt) {
   try {
     console.log('[INFO] Fallback: Unsplash API로 이미지 검색');
-    // 프롬프트가 있으면 프롬프트에서 키워드 추출, 없으면 제목에서 추출
     const searchText = thumbnailPrompt || postTitle;
     const keywords = extractKeywordsFromPrompt(searchText);
     const uniqueId = Date.now();
@@ -145,7 +182,6 @@ async function generateImageWithUnsplash(postTitle, thumbnailPrompt) {
     return imageUrl;
   } catch (error) {
     console.error('[WARN] Unsplash 실패:', error.message);
-    // 고유 ID 추가하여 매번 다른 이미지 반환
     const uniqueId = Date.now();
     return `https://picsum.photos/seed/${uniqueId}/1280/720`;
   }
@@ -186,9 +222,9 @@ export default async function handler(req, res) {
     } catch (geminiError) {
       console.log('[WARN] Gemini 실패, Unsplash로 전환:', geminiError.message);
 
-      // 2차 시도: Unsplash로 이미지 검색 (프롬프트 전달)
+      // 2차 시도: Unsplash로 이미지 검색
       imageUrl = await generateImageWithUnsplash(postTitle, thumbnailPrompt);
-      console.log('[INFO] Unsplash 썸네일 생성 완료 (프롬프트 기반)');
+      console.log('[INFO] Unsplash 썸네일 생성 완료');
 
       return res.status(200).json({
         success: true,
