@@ -46,7 +46,8 @@ async function uploadToStorage(base64Data) {
 }
 
 /**
- * Gemini로 AI 이미지 생성 (원래 작동했던 코드)
+ * Gemini로 AI 이미지 생성 - 2025 최신 모델
+ * Nano Banana Pro (gemini-3-pro-image-preview) > Nano Banana (gemini-2.5-flash-image)
  */
 async function generateImageWithGemini(postTitle, thumbnailPrompt) {
   const GEMINI_API_KEY = getConfigValue('gemini_api_key');
@@ -58,30 +59,44 @@ async function generateImageWithGemini(postTitle, thumbnailPrompt) {
   try {
     console.log('[INFO] Gemini 이미지 생성 시작');
 
-    const imagePrompt = (thumbnailPrompt ? `${thumbnailPrompt}, photorealistic, real photo, no text, no words, no letters, no writing on image` : `Professional modern blog thumbnail for: ${postTitle}. High quality, photorealistic real photo, no text, no words, no letters, 16:9 aspect ratio`);
+    const imagePrompt = thumbnailPrompt
+      ? `${thumbnailPrompt}, photorealistic, high quality, 16:9 aspect ratio, no text overlay`
+      : `Professional blog thumbnail about: ${postTitle}. Photorealistic, modern style, 16:9 aspect ratio, no text`;
 
     console.log('[INFO] 이미지 생성 프롬프트:', imagePrompt);
 
-    // 원래 사용했던 모델 (2.5 > 2.0 순서)
-    const models = ['gemini-2.5-flash-image', 'gemini-2.0-flash-exp-image-generation'];
-    let response;
+    // 2025년 최신 Gemini 이미지 모델 (우선순위 순)
+    const models = [
+      'gemini-3-pro-image-preview',    // Nano Banana Pro - 최고 품질 (4096px)
+      'gemini-2.5-flash-image',         // Nano Banana - 빠른 생성 (1024px)
+      'gemini-2.0-flash-exp-image-generation'  // 레거시 폴백
+    ];
+
     let lastError;
 
     for (const model of models) {
       try {
         console.log(`[INFO] ${model} 모델로 이미지 생성 시도...`);
-        response = await axios.post(
+
+        const response = await axios.post(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
           {
             contents: [{
-              parts: [{ text: `Generate an image: ${imagePrompt}` }]
+              parts: [{ text: `Generate a high-quality image: ${imagePrompt}` }]
             }],
             generationConfig: {
-              responseModalities: ['TEXT', 'IMAGE']
+              responseModalities: ['IMAGE', 'TEXT']
             }
           },
-          { timeout: 60000 }
+          {
+            timeout: 90000,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
         );
+
+        console.log(`[DEBUG] ${model} 응답 상태:`, response.status);
 
         // 이미지 응답 확인
         if (response.data?.candidates?.[0]?.content?.parts) {
@@ -89,22 +104,30 @@ async function generateImageWithGemini(postTitle, thumbnailPrompt) {
           for (const part of parts) {
             if (part.inlineData?.mimeType?.startsWith('image/')) {
               const base64Image = part.inlineData.data;
-              console.log(`[INFO] ${model} 이미지 생성 성공`);
+              console.log(`[INFO] ${model} 이미지 생성 성공! (${part.inlineData.mimeType})`);
               // Supabase Storage에 업로드하고 URL 반환
               return await uploadToStorage(base64Image);
             }
           }
+          console.log(`[WARN] ${model}: 응답에 이미지 없음, parts:`, parts.map(p => Object.keys(p)));
+        } else {
+          console.log(`[WARN] ${model}: candidates 없음`);
         }
-        console.log(`[WARN] ${model}: 이미지 응답 없음`);
       } catch (err) {
-        console.log(`[WARN] ${model} 실패:`, err.response?.data?.error?.message || err.message);
+        const errorMsg = err.response?.data?.error?.message || err.message;
+        console.log(`[WARN] ${model} 실패:`, errorMsg);
         lastError = err;
+
+        // 모델이 없는 경우 다음 모델로
+        if (errorMsg.includes('not found') || errorMsg.includes('does not exist')) {
+          continue;
+        }
       }
     }
 
     throw lastError || new Error('모든 Gemini 이미지 모델 실패');
   } catch (error) {
-    console.error('[WARN] Gemini 이미지 생성 실패:', error.message);
+    console.error('[ERROR] Gemini 이미지 생성 실패:', error.message);
     throw error;
   }
 }
