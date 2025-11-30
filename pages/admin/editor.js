@@ -98,6 +98,76 @@ export default function PostEditor() {
     }
   };
 
+  // 본문 이미지 재생성
+  const regenerateContentImages = async () => {
+    // 본문에서 picsum 또는 깨진 이미지 찾기
+    const imgRegex = /<img[^>]+src="([^"]+)"[^>]*>/g;
+    const matches = [...content.matchAll(imgRegex)];
+
+    if (matches.length === 0) {
+      alert('본문에 이미지가 없습니다.');
+      return;
+    }
+
+    const picsumImages = matches.filter(m =>
+      m[1].includes('picsum.photos') ||
+      m[1].includes('placeholder') ||
+      m[1].includes('via.placeholder')
+    );
+
+    if (picsumImages.length === 0) {
+      if (!confirm(`본문에 ${matches.length}개의 이미지가 있습니다. 모든 이미지를 AI로 새로 생성하시겠습니까?`)) {
+        return;
+      }
+    } else {
+      if (!confirm(`${picsumImages.length}개의 임시 이미지를 AI로 새로 생성하시겠습니까?`)) {
+        return;
+      }
+    }
+
+    setSaving(true);
+    let newContent = content;
+    let successCount = 0;
+
+    try {
+      const imagesToReplace = picsumImages.length > 0 ? picsumImages : matches;
+
+      for (let i = 0; i < imagesToReplace.length; i++) {
+        const match = imagesToReplace[i];
+        const oldSrc = match[1];
+
+        // 이미지별 프롬프트 생성
+        const imagePrompt = `Professional blog image for article about: ${title}, image ${i + 1} of ${imagesToReplace.length}, photorealistic, high quality, modern style, no text`;
+
+        try {
+          const res = await fetch('/api/generate-thumbnail', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              postTitle: title,
+              thumbnailPrompt: imagePrompt
+            })
+          });
+
+          const data = await res.json();
+          if (data.success && data.imageUrl) {
+            newContent = newContent.replace(oldSrc, data.imageUrl);
+            successCount++;
+          }
+        } catch (err) {
+          console.error(`이미지 ${i + 1} 생성 실패:`, err);
+        }
+      }
+
+      setContent(newContent);
+      alert(`✅ ${successCount}개의 본문 이미지가 재생성되었습니다!`);
+    } catch (err) {
+      alert('이미지 재생성 중 오류: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (!post) {
     return (
       <AdminLayout>
@@ -209,7 +279,16 @@ export default function PostEditor() {
 
         {/* 본문 에디터 */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold mb-4">📄 본문 내용</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">📄 본문 내용</h2>
+            <button
+              onClick={regenerateContentImages}
+              disabled={saving}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 text-sm"
+            >
+              🖼️ 본문 이미지 AI 재생성
+            </button>
+          </div>
           <TiptapEditor content={content} onChange={setContent} />
           <p className="text-sm text-gray-500 mt-4">
             💡 네이버 블로그처럼 편집하세요. 이미지, 링크, 표, 동영상, 서식 모두 가능합니다.
