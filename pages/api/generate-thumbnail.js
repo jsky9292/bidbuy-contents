@@ -20,7 +20,7 @@ async function uploadToStorage(base64Data) {
 
   const optimizedBuffer = await sharp(imageBuffer)
     .resize(1280, 720, { fit: 'cover' })
-    .jpeg({ quality: 80 })
+    .jpeg({ quality: 70, progressive: true })
     .toBuffer();
 
   const fileName = `thumb-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
@@ -60,8 +60,8 @@ async function generateImageWithGemini(postTitle, thumbnailPrompt) {
     console.log('[INFO] Gemini 이미지 생성 시작');
 
     const imagePrompt = thumbnailPrompt
-      ? `${thumbnailPrompt}, photorealistic, high quality, 16:9 aspect ratio, no text overlay`
-      : `Professional blog thumbnail about: ${postTitle}. Photorealistic, modern style, 16:9 aspect ratio, no text`;
+      ? `${thumbnailPrompt}, photorealistic, 1280x720 resolution, optimized for web, 16:9 aspect ratio, no text overlay`
+      : `Professional blog thumbnail about: ${postTitle}. Photorealistic, modern style, 1280x720 resolution, optimized for web, 16:9 aspect ratio, no text`;
 
     console.log('[INFO] 이미지 생성 프롬프트:', imagePrompt);
 
