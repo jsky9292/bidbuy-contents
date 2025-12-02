@@ -109,7 +109,8 @@ ${transcriptSummary}
   "title": "SEO 최적화 제목 60자 이내",
   "meta_description": "메타 설명 130-150자",
   "content": "위 HTML 구조 + {{IMAGE_1}}, {{IMAGE_2}}, {{IMAGE_3}} 포함 (각 섹션 사이에 배치)",
-  "keywords": ["키워드1", "키워드2", "키워드3"],
+  "keywords": ["키워드1", "키워드2", "키워드3", "키워드4", "키워드5", "키워드6", "키워드7", "키워드8"],
+  "hashtags": ["해시태그1", "해시태그2", "해시태그3", "해시태그4", "해시태그5", "해시태그6", "해시태그7", "해시태그8", "해시태그9", "해시태그10"],
   "thumbnail_prompt": "블로그 주제를 대표하는 구체적인 영어 프롬프트, photorealistic, 16:9 aspect ratio, vibrant colors",
   "image_prompts": [
     "첫번째 섹션 내용과 직접 관련된 구체적 장면 영어 프롬프트",
@@ -117,6 +118,11 @@ ${transcriptSummary}
     "세번째 섹션 내용과 직접 관련된 구체적 장면 영어 프롬프트"
   ]
 }
+
+📌 해시태그 규칙:
+- 10개 생성 (검색 노출용 SEO 해시태그)
+- 본문 주제와 관련된 인기 검색어 포함
+- 예: 일본여행 글 → ["일본여행", "오사카여행", "일본맛집", "오사카맛집", "일본쇼핑", "면세점", "일본교통", "오사카교통", "일본관광", "해외여행"]
 
 JSON만 출력. 다른 텍스트 금지.`;
 
@@ -375,6 +381,11 @@ export default async function handler(req, res) {
     console.log('[INFO] 데이터베이스에 저장 중...');
     const slug = generateSlug(blogContent.title);
 
+    // 해시태그 처리
+    const hashtags = Array.isArray(blogContent.hashtags)
+      ? blogContent.hashtags.join(', ')
+      : String(blogContent.hashtags || '');
+
     const post = await createPost({
       video_id: videoId,
       title: blogContent.title,
@@ -384,6 +395,7 @@ export default async function handler(req, res) {
       keywords: Array.isArray(blogContent.keywords)
         ? blogContent.keywords.join(', ')
         : String(blogContent.keywords || ''),
+      hashtags: hashtags,
       thumbnail_url: thumbnailUrl,
       status: 'draft',
     });

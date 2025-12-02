@@ -187,6 +187,21 @@ export default function Post({ post }) {
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
 
+            {/* 해시태그 */}
+            {post.hashtags && (
+              <div className="mt-10 pt-6 border-t border-gray-200">
+                <div className="flex flex-wrap gap-2">
+                  {post.hashtags.split(',').map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className="px-3 py-1.5 bg-teal-50 text-teal-700 rounded-full text-sm font-medium hover:bg-teal-100 transition cursor-pointer"
+                    >
+                      #{tag.trim()}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* 좋아요 & 공유 */}
             <div className="mt-12 pt-8 border-t border-gray-200">
