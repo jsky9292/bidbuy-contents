@@ -31,21 +31,27 @@
 }
 
 /* 블로그 글 스타일링 */
+.blog-content {
+  @apply text-gray-800;
+  font-size: 17px;
+  line-height: 1.9;
+}
+
 .blog-content h2 {
-  @apply text-2xl font-bold mt-8 mb-4;
+  @apply text-2xl font-bold mt-12 mb-6 text-gray-900;
 }
 
 .blog-content h3 {
-  @apply text-xl font-semibold mt-6 mb-3;
+  @apply text-xl font-semibold mt-10 mb-4 text-gray-900;
 }
 
 .blog-content p {
-  @apply mb-4 leading-relaxed;
+  @apply mb-6 leading-relaxed;
 }
 
 .blog-content ul,
 .blog-content ol {
-  @apply mb-4 ml-6 space-y-2;
+  @apply mb-6 ml-6 space-y-3;
 }
 
 .blog-content ul li {
@@ -58,4 +64,29 @@
 
 .blog-content a {
   @apply text-primary-600 hover:underline;
+}
+
+.blog-content img {
+  @apply my-8 rounded-lg;
+}
+
+.blog-content blockquote {
+  @apply my-6 pl-4 border-l-4 border-primary-400 italic text-gray-600;
+}
+
+.blog-content table {
+  @apply my-6 w-full;
+}
+
+.blog-content th,
+.blog-content td {
+  @apply px-4 py-3 border border-gray-200;
+}
+
+.blog-content th {
+  @apply bg-gray-100 font-semibold;
+}
+
+.blog-content div[style*="background"] {
+  @apply my-6;
 }
