@@ -1,84 +1,91 @@
 // pages/index.js
-// 토스 스타일 메인 홈페이지
+// 비드바이 - 일본 정보 콘텐츠 블로그
 
 import Layout from '../components/Layout';
 import PostCard from '../components/PostCard';
 import Link from 'next/link';
 import { getPublishedPosts } from '../lib/db';
+import { getAllCategories } from '../lib/categories';
 
 export default function Home({ posts }) {
+  const categories = getAllCategories();
+
   return (
     <Layout>
       {/* 히어로 섹션 */}
-      <section className="bg-gradient-to-b from-blue-50 to-white py-16 md:py-20">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="text-center">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight mb-4">
-              보험사가 알려주지 않는<br />
-              <span className="text-blue-500">보험금 청구의 모든 것</span>
-            </h1>
-            <p className="text-gray-500 text-lg mb-8">
-              손해사정사가 직접 알려드립니다
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/calculator">
-                <button className="w-full sm:w-auto px-6 py-3 bg-blue-500 text-white rounded-2xl font-medium hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30">
-                  합의금 계산하기
-                </button>
-              </Link>
-              <Link href="/contact">
-                <button className="w-full sm:w-auto px-6 py-3 bg-white text-gray-700 rounded-2xl font-medium hover:bg-gray-50 transition-colors border">
-                  무료 상담 신청
-                </button>
-              </Link>
-            </div>
+      <section className="bg-gradient-to-br from-[#e0f2f1] to-white py-12">
+        <div className="max-w-5xl mx-auto px-4 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            일본의 모든 것, <span className="text-[#4db6ac]">Bidbuy</span>
+          </h1>
+          <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
+            일본 여행, 쇼핑, 문화, 환율 정보까지!<br className="hidden sm:block" />
+            유용한 일본 정보를 한곳에서 만나보세요.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link href="/category/travel" className="px-5 py-2.5 bg-[#4db6ac] text-white rounded-full text-sm font-medium hover:bg-[#26a69a] transition-colors">
+              ✈️ 일본여행
+            </Link>
+            <Link href="/category/exchange" className="px-5 py-2.5 bg-white text-gray-700 rounded-full text-sm font-medium border border-gray-200 hover:border-[#4db6ac] hover:text-[#4db6ac] transition-colors">
+              💴 환율정보
+            </Link>
+            <Link href="/category/proxy" className="px-5 py-2.5 bg-white text-gray-700 rounded-full text-sm font-medium border border-gray-200 hover:border-[#4db6ac] hover:text-[#4db6ac] transition-colors">
+              🛒 구매대행
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* 신뢰 지표 */}
-      <section className="py-8">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="bg-white rounded-3xl shadow-sm border p-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-              <div>
-                <div className="text-2xl font-bold text-blue-500">500+</div>
-                <div className="text-sm text-gray-500 mt-1">상담 사례</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-blue-500">92%</div>
-                <div className="text-sm text-gray-500 mt-1">청구 성공률</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-blue-500">15년</div>
-                <div className="text-sm text-gray-500 mt-1">업계 경력</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-blue-500">24h</div>
-                <div className="text-sm text-gray-500 mt-1">빠른 응답</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 카테고리 */}
-      <section className="py-8">
-        <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">어떤 보험이 궁금하세요?</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { name: '분쟁사례', desc: '이렇게 해결했어요', href: '/cases', color: 'bg-red-50 text-red-600' },
-              { name: '자동차보험', desc: '사고 합의금', href: '/category/auto', color: 'bg-blue-50 text-blue-600' },
-              { name: '실손보험', desc: '의료비 청구', href: '/category/health', color: 'bg-green-50 text-green-600' },
-              { name: '생명보험', desc: '진단비, 수술비', href: '/category/life', color: 'bg-purple-50 text-purple-600' },
-            ].map((cat) => (
-              <Link key={cat.name} href={cat.href}>
-                <div className="bg-white rounded-2xl p-4 hover:shadow-md transition-all cursor-pointer border h-full">
-                  <div className={`inline-block px-2 py-1 rounded-lg text-xs font-medium mb-2 ${cat.color}`}>
-                    {cat.name}
+      {/* 카테고리 섹션 */}
+      <section className="py-10 bg-white">
+        <div className="max-w-5xl mx-auto px-4">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">카테고리별 정보</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {categories.map((cat) => (
+              <Link key={cat.id} href={`/category/${cat.slug}`}>
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg hover:border-[#4db6ac] transition-all cursor-pointer group">
+                  <div className="relative h-28 overflow-hidden">
+                    <img
+                      src={cat.image}
+                      alt={cat.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                   </div>
-                  <div className="text-sm text-gray-500">{cat.desc}</div>
+                  <div className="p-3 text-center">
+                    <div className="font-medium text-gray-900 group-hover:text-[#4db6ac] transition-colors">{cat.name}</div>
+                    <div className="text-xs text-gray-500 mt-1 line-clamp-1">{cat.description}</div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 인기 토픽 */}
+      <section className="py-10 bg-gray-50">
+        <div className="max-w-5xl mx-auto px-4">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">인기 토픽</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { title: '오사카 3박4일 여행 코스', desc: '도톤보리, 유니버셜, 교토까지', image: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400&q=80', href: '/category/travel' },
+              { title: '엔화 환전 타이밍', desc: '환율 저점에 환전하는 방법', image: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400&q=80', href: '/category/exchange' },
+              { title: '야후옥션 입찰 가이드', desc: '처음 시작하는 일본 경매', image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&q=80', href: '/category/proxy' },
+            ].map((topic) => (
+              <Link key={topic.title} href={topic.href}>
+                <div className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-md hover:border-[#4db6ac] transition-all cursor-pointer group">
+                  <div className="relative h-36 overflow-hidden">
+                    <img
+                      src={topic.image}
+                      alt={topic.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <div className="font-medium text-gray-900 mb-1 group-hover:text-[#4db6ac] transition-colors">{topic.title}</div>
+                    <div className="text-sm text-gray-500">{topic.desc}</div>
+                  </div>
                 </div>
               </Link>
             ))}
@@ -87,22 +94,23 @@ export default function Home({ posts }) {
       </section>
 
       {/* 최신 포스트 */}
-      <section className="py-8">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold text-gray-900">최신 보험 정보</h2>
-            <Link href="/category/all" className="text-sm text-blue-500 hover:text-blue-600">
-              전체 보기
+      <section className="py-8 bg-white">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-gray-900">최신 정보</h2>
+            <Link href="/category/all" className="text-sm text-[#4db6ac] hover:text-[#00897b] font-medium">
+              전체 보기 →
             </Link>
           </div>
 
           {posts.length === 0 ? (
-            <div className="text-center py-16 bg-gray-50 rounded-2xl">
+            <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="text-4xl mb-3">📦</div>
               <p className="text-gray-500">아직 포스트가 없습니다</p>
               <p className="text-gray-400 text-sm mt-1">곧 유용한 정보로 찾아뵙겠습니다</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {posts.map((post) => (
                 <PostCard key={post.id} post={post} />
               ))}
@@ -112,8 +120,8 @@ export default function Home({ posts }) {
       </section>
 
       {/* 광고 배너 */}
-      <div className="max-w-4xl mx-auto px-4 py-4">
-        <div className="bg-gray-100 rounded-2xl p-4 text-center text-gray-400 text-sm">
+      <div className="max-w-5xl mx-auto px-4 py-4">
+        <div className="bg-gray-100 rounded-xl p-4 text-center text-gray-400 text-sm">
           <ins className="adsbygoogle"
             style={{ display: 'block' }}
             data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
@@ -123,21 +131,24 @@ export default function Home({ posts }) {
         </div>
       </div>
 
-      {/* CTA */}
+      {/* CTA - 비드바이 링크 */}
       <section className="py-12">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="bg-blue-500 rounded-3xl p-8 text-center text-white">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="bg-gradient-to-r from-[#4db6ac] to-[#00897b] rounded-2xl p-8 text-center text-white">
             <h2 className="text-xl font-bold mb-2">
-              보험금 청구, 혼자 고민하지 마세요
+              일본 직구, 어렵지 않아요!
             </h2>
-            <p className="text-blue-100 mb-6 text-sm">
-              손해사정사가 무료로 검토해드립니다
+            <p className="text-green-100 mb-6 text-sm">
+              야후옥션, 메루카리, 라쿠텐까지 - 비드바이가 대신 구매해 드립니다
             </p>
-            <Link href="/contact">
-              <button className="px-6 py-3 bg-white text-blue-500 rounded-2xl font-medium hover:bg-blue-50 transition-colors">
-                무료 상담 신청하기
-              </button>
-            </Link>
+            <a
+              href="https://bidbuy.co.kr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-6 py-3 bg-white text-[#00897b] rounded-lg font-medium hover:bg-green-50 transition-colors"
+            >
+              비드바이 바로가기 →
+            </a>
           </div>
         </div>
       </section>

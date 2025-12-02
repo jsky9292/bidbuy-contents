@@ -1,5 +1,5 @@
 // components/Navbar.js
-// 토스 스타일 네비게이션
+// 비드바이 스타일 네비게이션
 
 import Link from 'next/link';
 import { useState } from 'react';
@@ -8,48 +8,55 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { name: '가이드', href: '/guides' },
-    { name: '분쟁사례', href: '/cases' },
-    { name: '자동차보험', href: '/category/auto' },
-    { name: '실손보험', href: '/category/health' },
-    { name: '생명보험', href: '/category/life' },
+    { name: '일본여행', href: '/category/travel' },
+    { name: '환율정보', href: '/category/exchange' },
+    { name: '구매대행', href: '/category/proxy' },
+    { name: '일본쇼핑', href: '/category/shopping' },
+    { name: '일본문화', href: '/category/culture' },
   ];
 
   return (
-    <nav className="bg-white sticky top-0 z-50 shadow-sm">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="flex justify-between items-center h-14">
+    <nav className="bg-white sticky top-0 z-50 border-b border-gray-200">
+      <div className="max-w-5xl mx-auto px-4">
+        <div className="flex justify-between items-center h-16">
           {/* 로고 */}
           <Link href="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="보험을 담다" className="h-8 w-auto" />
-            <span className="text-lg font-bold text-gray-900">보험을 담다</span>
+            <span className="text-2xl font-bold italic text-[#4db6ac]">Bidbuy</span>
+            <span className="text-xs text-gray-400 hidden sm:block">Japan Contents</span>
           </Link>
 
-          {/* 데스크톱 메뉴 */}
-          <div className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="px-3 py-2 text-sm text-gray-600 hover:text-blue-500 rounded-lg transition-colors"
-              >
-                {item.name}
-              </Link>
-            ))}
+          {/* 검색바 (데스크톱) */}
+          <div className="hidden md:flex flex-1 max-w-md mx-8">
+            <div className="relative w-full">
+              <input
+                type="text"
+                placeholder="검색어를 입력해 주세요."
+                className="w-full px-4 py-2 border-2 border-[#4db6ac] rounded-full text-sm focus:outline-none focus:border-[#00897b]"
+              />
+              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4db6ac]">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+            </div>
           </div>
 
-          {/* 상담 버튼 */}
-          <div className="hidden md:flex items-center gap-3">
-            <Link
-              href="/calculator"
-              className="text-sm text-gray-600 hover:text-blue-500 transition-colors"
-            >
-              합의금계산
+          {/* 우측 아이콘들 */}
+          <div className="hidden md:flex items-center gap-4">
+            <Link href="/contact" className="text-gray-600 hover:text-[#4db6ac]">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
             </Link>
-            <Link href="/contact">
-              <button className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-xl hover:bg-blue-600 transition-colors">
-                무료상담
-              </button>
+            <Link href="/calculator" className="text-gray-600 hover:text-[#4db6ac]">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+            </Link>
+            <Link href="/contact" className="text-gray-600 hover:text-[#4db6ac]">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
             </Link>
           </div>
 
@@ -60,7 +67,7 @@ export default function Navbar() {
             aria-label="메뉴"
           >
             <svg
-              className="w-5 h-5 text-gray-700"
+              className="w-6 h-6 text-gray-700"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -73,33 +80,59 @@ export default function Navbar() {
             </svg>
           </button>
         </div>
+
+        {/* 카테고리 메뉴 (데스크톱) */}
+        <div className="hidden md:flex items-center gap-1 py-2 border-t border-gray-100">
+          <button className="p-2 text-gray-600 hover:text-[#4db6ac]">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          {navItems.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-[#4db6ac] transition-colors"
+            >
+              {item.name}
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* 모바일 메뉴 */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t">
-          <div className="px-4 py-3 space-y-1">
+          {/* 모바일 검색바 */}
+          <div className="px-4 py-3">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="검색어를 입력해 주세요."
+                className="w-full px-4 py-2 border-2 border-[#4db6ac] rounded-full text-sm focus:outline-none"
+              />
+              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4db6ac]">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div className="px-4 pb-3 space-y-1">
             {navItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="block px-3 py-2.5 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                className="block px-3 py-2.5 text-gray-700 hover:bg-[#e0f2f1] hover:text-[#4db6ac] rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {item.name}
               </Link>
             ))}
             <div className="pt-2 border-t mt-2">
-              <Link
-                href="/calculator"
-                className="block px-3 py-2.5 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                합의금 계산기
-              </Link>
               <Link href="/contact" onClick={() => setMobileMenuOpen(false)}>
-                <div className="mt-2 px-3 py-2.5 bg-blue-500 text-white text-center rounded-xl font-medium">
-                  무료 상담 신청
+                <div className="mt-2 px-3 py-2.5 bg-[#4db6ac] text-white text-center rounded-lg font-medium">
+                  구매대행 신청하기
                 </div>
               </Link>
             </div>
