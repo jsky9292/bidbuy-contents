@@ -1,24 +1,25 @@
 // pages/admin/consultations.js
-// 문의 관�??�?�보??
+// 문의 관리 대시보드
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 
 const statusLabels = {
-  pending: { text: '?�기중', color: 'bg-yellow-100 text-yellow-700' },
-  contacted: { text: '?�락?�료', color: 'bg-teal-100 text-teal-700' },
-  in_progress: { text: '진행�?, color: 'bg-purple-100 text-purple-700' },
-  completed: { text: '?�료', color: 'bg-green-100 text-green-700' },
+  pending: { text: '대기중', color: 'bg-yellow-100 text-yellow-700' },
+  contacted: { text: '연락완료', color: 'bg-teal-100 text-teal-700' },
+  in_progress: { text: '진행중', color: 'bg-purple-100 text-purple-700' },
+  completed: { text: '완료', color: 'bg-green-100 text-green-700' },
   cancelled: { text: '취소', color: 'bg-gray-100 text-gray-500' },
 };
 
 const insuranceLabels = {
-  auto: '?�동차보??,
-  health: '?�손보험',
-  life: '?�명/건강보험',
-  property: '?�물/?�재보험',
-  other: '기�?',
+  auto: '자동차보험',
+  health: '실손보험',
+  life: '생명/건강보험',
+  property: '재물/화재보험',
+  other: '기타',
 };
 
 export default function ConsultationsPage() {
@@ -52,7 +53,7 @@ export default function ConsultationsPage() {
         setConsultations(data.data);
       }
     } catch (error) {
-      console.error('문의 조회 ?�류:', error);
+      console.error('문의 조회 오류:', error);
     } finally {
       setLoading(false);
     }
@@ -77,12 +78,12 @@ export default function ConsultationsPage() {
         }
       }
     } catch (error) {
-      console.error('?�태 ?�데?�트 ?�류:', error);
+      console.error('상태 업데이트 오류:', error);
     }
   };
 
   const deleteConsultation = async (id) => {
-    if (!confirm('?�말 ??��?�시겠습?�까?')) return;
+    if (!confirm('정말 삭제하시겠습니까?')) return;
 
     try {
       const token = localStorage.getItem('adminToken');
@@ -101,7 +102,7 @@ export default function ConsultationsPage() {
         setSelectedItem(null);
       }
     } catch (error) {
-      console.error('??�� ?�류:', error);
+      console.error('삭제 오류:', error);
     }
   };
 
@@ -128,31 +129,32 @@ export default function ConsultationsPage() {
   return (
     <>
       <Head>
-        <title>문의 관�?| 보담</title>
+        <title>문의 관리 | 보담</title>
         <meta name="robots" content="noindex, nofollow" />
       </Head>
 
       <div className="min-h-screen bg-gray-50">
-        {/* ?�더 */}
+        {/* 헤더 */}
         <header className="bg-white border-b sticky top-0 z-10">
           <div className="max-w-7xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Link href="/admin/dashboard">
-                  <span className="text-gray-500 hover:text-gray-700 cursor-pointer">???�?�보??/span>
+                  <span className="text-gray-500 hover:text-gray-700 cursor-pointer">← 대시보드</span>
                 </Link>
-                <h1 className="text-xl font-bold text-gray-900">문의 관�?/h1>
+                <h1 className="text-xl font-bold text-gray-900">문의 관리</h1>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-500">
-                  �?{consultations.length}�?                </span>
+                  총 {consultations.length}건
+                </span>
               </div>
             </div>
           </div>
         </header>
 
         <div className="max-w-7xl mx-auto px-4 py-6">
-          {/* ?�터 */}
+          {/* 필터 */}
           <div className="bg-white rounded-xl border p-4 mb-6">
             <div className="flex flex-wrap gap-2">
               <button
@@ -161,7 +163,7 @@ export default function ConsultationsPage() {
                   filter === 'all' ? 'bg-teal-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                ?�체
+                전체
               </button>
               {Object.entries(statusLabels).map(([key, { text }]) => (
                 <button
@@ -181,12 +183,12 @@ export default function ConsultationsPage() {
           {loading ? (
             <div className="text-center py-12">
               <div className="animate-spin w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full mx-auto"></div>
-              <p className="mt-4 text-gray-500">로딩 �?..</p>
+              <p className="mt-4 text-gray-500">로딩 중...</p>
             </div>
           ) : consultations.length === 0 ? (
             <div className="bg-white rounded-xl border p-12 text-center">
-              <div className="text-5xl mb-4">?��</div>
-              <p className="text-gray-500">문의가 ?�습?�다.</p>
+              <div className="text-5xl mb-4">📭</div>
+              <p className="text-gray-500">문의가 없습니다.</p>
             </div>
           ) : (
             <div className="bg-white rounded-xl border overflow-hidden">
@@ -194,13 +196,13 @@ export default function ConsultationsPage() {
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b">
                     <tr>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">?�태</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">?�름</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">?�락�?/th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">상태</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">이름</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">연락처</th>
                       <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">보험종류</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">?�황</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">?�수?�시</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">?�션</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">상황</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">접수일시</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">액션</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
@@ -221,7 +223,7 @@ export default function ConsultationsPage() {
                             onClick={() => openDetail(item)}
                             className="px-3 py-1 bg-teal-50 text-teal-600 rounded-lg text-sm hover:bg-teal-100 transition-colors"
                           >
-                            ?�세보기
+                            상세보기
                           </button>
                         </td>
                       </tr>
@@ -234,24 +236,25 @@ export default function ConsultationsPage() {
         </div>
       </div>
 
-      {/* ?�세 모달 */}
+      {/* 상세 모달 */}
       {showModal && selectedItem && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">문의 ?�세</h2>
+                <h2 className="text-xl font-bold text-gray-900">문의 상세</h2>
                 <button
                   onClick={() => setShowModal(false)}
                   className="text-gray-400 hover:text-gray-600"
                 >
-                  ??                </button>
+                  ✕
+                </button>
               </div>
 
               <div className="space-y-4">
-                {/* ?�태 변�?*/}
+                {/* 상태 변경 */}
                 <div className="bg-gray-50 rounded-xl p-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">?�태</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">상태</label>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(statusLabels).map(([key, { text, color }]) => (
                       <button
@@ -267,14 +270,14 @@ export default function ConsultationsPage() {
                   </div>
                 </div>
 
-                {/* 기본 ?�보 */}
+                {/* 기본 정보 */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm text-gray-500 mb-1">?�름</label>
+                    <label className="block text-sm text-gray-500 mb-1">이름</label>
                     <p className="font-medium">{selectedItem.name}</p>
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-500 mb-1">?�락�?/label>
+                    <label className="block text-sm text-gray-500 mb-1">연락처</label>
                     <p className="font-medium">
                       <a href={`tel:${selectedItem.phone}`} className="text-teal-600 hover:underline">
                         {formatPhone(selectedItem.phone)}
@@ -285,7 +288,7 @@ export default function ConsultationsPage() {
 
                 {selectedItem.email && (
                   <div>
-                    <label className="block text-sm text-gray-500 mb-1">?�메??/label>
+                    <label className="block text-sm text-gray-500 mb-1">이메일</label>
                     <p className="font-medium">
                       <a href={`mailto:${selectedItem.email}`} className="text-teal-600 hover:underline">
                         {selectedItem.email}
@@ -301,7 +304,7 @@ export default function ConsultationsPage() {
                   </div>
                   {selectedItem.accident_type && (
                     <div>
-                      <label className="block text-sm text-gray-500 mb-1">?�고?�형</label>
+                      <label className="block text-sm text-gray-500 mb-1">사고유형</label>
                       <p className="font-medium">{selectedItem.accident_type}</p>
                     </div>
                   )}
@@ -309,20 +312,20 @@ export default function ConsultationsPage() {
 
                 {selectedItem.current_status && (
                   <div>
-                    <label className="block text-sm text-gray-500 mb-1">?�재 ?�황</label>
+                    <label className="block text-sm text-gray-500 mb-1">현재 상황</label>
                     <p className="font-medium">{selectedItem.current_status}</p>
                   </div>
                 )}
 
                 {selectedItem.description && (
                   <div>
-                    <label className="block text-sm text-gray-500 mb-1">?�세 ?�용</label>
+                    <label className="block text-sm text-gray-500 mb-1">상세 내용</label>
                     <p className="bg-gray-50 rounded-lg p-3 text-sm whitespace-pre-wrap">{selectedItem.description}</p>
                   </div>
                 )}
 
                 <div className="text-sm text-gray-400">
-                  ?�수?�시: {formatDate(selectedItem.created_at)}
+                  접수일시: {formatDate(selectedItem.created_at)}
                 </div>
               </div>
 
@@ -331,13 +334,13 @@ export default function ConsultationsPage() {
                   href={`tel:${selectedItem.phone}`}
                   className="flex-1 py-2.5 bg-teal-500 text-white rounded-xl font-medium text-center hover:bg-teal-600 transition-colors"
                 >
-                  ?�화?�기
+                  전화하기
                 </a>
                 <button
                   onClick={() => deleteConsultation(selectedItem.id)}
                   className="px-4 py-2.5 bg-red-50 text-red-600 rounded-xl font-medium hover:bg-red-100 transition-colors"
                 >
-                  ??��
+                  삭제
                 </button>
               </div>
             </div>

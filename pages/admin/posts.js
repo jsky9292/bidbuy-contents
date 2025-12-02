@@ -1,5 +1,5 @@
 // pages/admin/posts.js
-// ?�스??관�??�이지
+// 포스트 관리 페이지
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
@@ -7,13 +7,13 @@ import Head from 'next/head';
 import Link from 'next/link';
 
 const categoryLabels = {
-  auto: '?�동차보??,
-  health: '?�손보험',
-  life: '?�명보험',
-  property: '?�물보험',
-  dispute: '분쟁?�결',
-  cases: '?�제?��?',
-  tools: '보험금진??,
+  auto: '자동차보험',
+  health: '실손보험',
+  life: '생명보험',
+  property: '재물보험',
+  dispute: '분쟁해결',
+  cases: '실제사례',
+  tools: '보험금진단',
 };
 
 export default function PostsManagement() {
@@ -41,7 +41,7 @@ export default function PostsManagement() {
         setPosts(data.posts);
       }
     } catch (error) {
-      console.error('?�스??조회 ?�류:', error);
+      console.error('포스트 조회 오류:', error);
     } finally {
       setLoading(false);
     }
@@ -73,19 +73,19 @@ export default function PostsManagement() {
 
       const data = await res.json();
       if (data.success) {
-        alert('?�?�되?�습?�다.');
+        alert('저장되었습니다.');
         setShowModal(false);
         fetchPosts();
       } else {
-        alert('?�류: ' + data.error);
+        alert('오류: ' + data.error);
       }
     } catch (error) {
-      alert('?�??�??�류가 발생?�습?�다.');
+      alert('저장 중 오류가 발생했습니다.');
     }
   };
 
   const handleDelete = async (post) => {
-    if (!confirm(`"${post.title}" ?�스?��? ??��?�시겠습?�까?`)) return;
+    if (!confirm(`"${post.title}" 포스트를 삭제하시겠습니까?`)) return;
 
     try {
       const res = await fetch('/api/posts/delete', {
@@ -96,13 +96,13 @@ export default function PostsManagement() {
 
       const data = await res.json();
       if (data.success) {
-        alert('??��?�었?�니??');
+        alert('삭제되었습니다.');
         fetchPosts();
       } else {
-        alert('?�류: ' + data.error);
+        alert('오류: ' + data.error);
       }
     } catch (error) {
-      alert('??�� �??�류가 발생?�습?�다.');
+      alert('삭제 중 오류가 발생했습니다.');
     }
   };
 
@@ -121,23 +121,24 @@ export default function PostsManagement() {
   return (
     <>
       <Head>
-        <title>?�스??관�?| 보담</title>
+        <title>포스트 관리 | 보담</title>
         <meta name="robots" content="noindex, nofollow" />
       </Head>
 
       <div className="min-h-screen bg-gray-50">
-        {/* ?�더 */}
+        {/* 헤더 */}
         <header className="bg-white border-b sticky top-0 z-10">
           <div className="max-w-7xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Link href="/admin/dashboard">
-                  <span className="text-gray-500 hover:text-gray-700 cursor-pointer">???�?�보??/span>
+                  <span className="text-gray-500 hover:text-gray-700 cursor-pointer">← 대시보드</span>
                 </Link>
-                <h1 className="text-xl font-bold text-gray-900">?�스??관�?/h1>
+                <h1 className="text-xl font-bold text-gray-900">포스트 관리</h1>
               </div>
               <div className="text-sm text-gray-500">
-                �?{posts.length}�?              </div>
+                총 {posts.length}개
+              </div>
             </div>
           </div>
         </header>
@@ -149,7 +150,7 @@ export default function PostsManagement() {
             </div>
           ) : posts.length === 0 ? (
             <div className="bg-white rounded-xl border p-12 text-center">
-              <p className="text-gray-500">?�스?��? ?�습?�다.</p>
+              <p className="text-gray-500">포스트가 없습니다.</p>
             </div>
           ) : (
             <div className="bg-white rounded-xl border overflow-hidden">
@@ -157,12 +158,12 @@ export default function PostsManagement() {
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b">
                     <tr>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">?�네??/th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">?�목</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">썸네일</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">제목</th>
                       <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">카테고리</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">?�태</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">?�짜</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">?�션</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">상태</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">날짜</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">액션</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
@@ -178,7 +179,7 @@ export default function PostsManagement() {
                             />
                           ) : (
                             <div className="w-20 h-12 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-400">
-                              ?�음
+                              없음
                             </div>
                           )}
                         </td>
@@ -195,7 +196,7 @@ export default function PostsManagement() {
                             post.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
                             'bg-gray-100 text-gray-600'
                           }`}>
-                            {post.status === 'published' ? '발행?? : post.status === 'draft' ? '?�시?�?? : post.status}
+                            {post.status === 'published' ? '발행됨' : post.status === 'draft' ? '임시저장' : post.status}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-500">
@@ -207,7 +208,7 @@ export default function PostsManagement() {
                               onClick={() => handleEdit(post)}
                               className="px-3 py-1 bg-teal-50 text-teal-600 rounded text-sm hover:bg-teal-100"
                             >
-                              ?�정
+                              수정
                             </button>
                             <a
                               href={`/posts/${post.slug}`}
@@ -220,7 +221,7 @@ export default function PostsManagement() {
                               onClick={() => handleDelete(post)}
                               className="px-3 py-1 bg-red-50 text-red-600 rounded text-sm hover:bg-red-100"
                             >
-                              ??��
+                              삭제
                             </button>
                           </div>
                         </td>
@@ -234,13 +235,13 @@ export default function PostsManagement() {
         </div>
       </div>
 
-      {/* ?�정 모달 */}
+      {/* 수정 모달 */}
       {showModal && editingPost && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">?�스???�정</h2>
+                <h2 className="text-xl font-bold text-gray-900">포스트 수정</h2>
                 <button
                   onClick={() => setShowModal(false)}
                   className="text-gray-400 hover:text-gray-600 text-2xl"
@@ -250,9 +251,9 @@ export default function PostsManagement() {
               </div>
 
               <div className="space-y-4">
-                {/* ?�목 */}
+                {/* 제목 */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">?�목</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">제목</label>
                   <input
                     type="text"
                     value={editingPost.title}
@@ -261,9 +262,9 @@ export default function PostsManagement() {
                   />
                 </div>
 
-                {/* ?�명 */}
+                {/* 설명 */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">메�? ?�명</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">메타 설명</label>
                   <textarea
                     value={editingPost.meta_description || ''}
                     onChange={(e) => setEditingPost({ ...editingPost, meta_description: e.target.value })}
@@ -286,9 +287,9 @@ export default function PostsManagement() {
                   </select>
                 </div>
 
-                {/* ?�네??*/}
+                {/* 썸네일 */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">?�네??URL</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">썸네일 URL</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -300,13 +301,13 @@ export default function PostsManagement() {
                       onClick={regenerateThumbnail}
                       className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200"
                     >
-                      ?�동?�성
+                      자동생성
                     </button>
                   </div>
                   {editingPost.thumbnail_url && (
                     <img
                       src={editingPost.thumbnail_url}
-                      alt="?�네??미리보기"
+                      alt="썸네일 미리보기"
                       className="mt-2 w-full max-w-xs rounded border"
                       onError={(e) => { e.target.style.display = 'none'; }}
                     />
@@ -330,7 +331,8 @@ export default function PostsManagement() {
                   onClick={handleSave}
                   className="flex-1 py-2.5 bg-teal-500 text-white rounded-xl font-medium hover:bg-teal-600"
                 >
-                  ?�??                </button>
+                  저장
+                </button>
                 <button
                   onClick={() => setShowModal(false)}
                   className="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200"

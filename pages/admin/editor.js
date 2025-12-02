@@ -36,12 +36,13 @@ export default function PostEditor() {
         setThumbnailUrl(data.post.thumbnail_url || '');
       }
     } catch (err) {
-      console.error('?�스??로드 ?�패:', err);
-      alert('?�스?��? 불러?????�습?�다.');
+      console.error('포스트 로드 실패:', err);
+      alert('포스트를 불러올 수 없습니다.');
     }
   };
 
-  // base64 ?��?지�?URL�?변??  const convertBase64ToUrl = async (contentHtml) => {
+  // base64 이미지를 URL로 변환
+  const convertBase64ToUrl = async (contentHtml) => {
     const base64Regex = /<img[^>]+src="(data:image\/[^;]+;base64,[^"]+)"[^>]*>/g;
     const matches = [...contentHtml.matchAll(base64Regex)];
 
@@ -62,7 +63,7 @@ export default function PostEditor() {
           newContent = newContent.replace(base64Data, data.url);
         }
       } catch (err) {
-        console.error('base64 변???�패:', err);
+        console.error('base64 변환 실패:', err);
       }
     }
 
@@ -72,7 +73,8 @@ export default function PostEditor() {
   const savePost = async () => {
     setSaving(true);
     try {
-      // base64 ?��?지가 ?�으�?먼�? URL�?변??      const processedContent = await convertBase64ToUrl(content);
+      // base64 이미지가 있으면 먼저 URL로 변환
+      const processedContent = await convertBase64ToUrl(content);
 
       const res = await fetch('/api/posts/update', {
         method: 'POST',
@@ -88,23 +90,23 @@ export default function PostEditor() {
       });
       const data = await res.json();
       if (data.success) {
-        alert('???�?�되?�습?�다!');
+        alert('✅ 저장되었습니다!');
         router.push('/admin/dashboard');
       } else {
-        alert('?�???�패: ' + data.message);
+        alert('저장 실패: ' + data.message);
       }
     } catch (err) {
-      console.error('?�???�패:', err);
-      alert('?�??�??�류가 발생?�습?�다.');
+      console.error('저장 실패:', err);
+      alert('저장 중 오류가 발생했습니다.');
     } finally {
       setSaving(false);
     }
   };
 
   const regenerateThumbnail = async () => {
-    if (!confirm('?�네?�을 ?�시 ?�성?�시겠습?�까?')) return;
+    if (!confirm('썸네일을 다시 생성하시겠습니까?')) return;
 
-    const prompt = window.prompt('?�네???�롬?�트�??�력?�세??(?�어):', '');
+    const prompt = window.prompt('썸네일 프롬프트를 입력하세요 (영어):', '');
     if (!prompt) return;
 
     setSaving(true);
@@ -117,24 +119,25 @@ export default function PostEditor() {
       const data = await res.json();
       if (data.success) {
         setThumbnailUrl(data.imageUrl);
-        alert('???�네?�이 ?�성?�었?�니??');
+        alert('✅ 썸네일이 생성되었습니다!');
       } else {
-        alert('?�성 ?�패: ' + data.message);
+        alert('생성 실패: ' + data.message);
       }
     } catch (err) {
-      alert('?�네???�성 ?�패');
+      alert('썸네일 생성 실패');
     } finally {
       setSaving(false);
     }
   };
 
-  // 본문 ?��?지 ?�생??  const regenerateContentImages = async () => {
-    // 본문?�서 picsum ?�는 깨진 ?��?지 찾기
+  // 본문 이미지 재생성
+  const regenerateContentImages = async () => {
+    // 본문에서 picsum 또는 깨진 이미지 찾기
     const imgRegex = /<img[^>]+src="([^"]+)"[^>]*>/g;
     const matches = [...content.matchAll(imgRegex)];
 
     if (matches.length === 0) {
-      alert('본문???��?지가 ?�습?�다.');
+      alert('본문에 이미지가 없습니다.');
       return;
     }
 
@@ -145,11 +148,11 @@ export default function PostEditor() {
     );
 
     if (picsumImages.length === 0) {
-      if (!confirm(`본문??${matches.length}개의 ?��?지가 ?�습?�다. 모든 ?��?지�?AI�??�로 ?�성?�시겠습?�까?`)) {
+      if (!confirm(`본문에 ${matches.length}개의 이미지가 있습니다. 모든 이미지를 AI로 새로 생성하시겠습니까?`)) {
         return;
       }
     } else {
-      if (!confirm(`${picsumImages.length}개의 ?�시 ?��?지�?AI�??�로 ?�성?�시겠습?�까?`)) {
+      if (!confirm(`${picsumImages.length}개의 임시 이미지를 AI로 새로 생성하시겠습니까?`)) {
         return;
       }
     }
@@ -165,7 +168,7 @@ export default function PostEditor() {
         const match = imagesToReplace[i];
         const oldSrc = match[1];
 
-        // ?��?지�??�롬?�트 ?�성
+        // 이미지별 프롬프트 생성
         const imagePrompt = `Professional blog image for article about: ${title}, image ${i + 1} of ${imagesToReplace.length}, photorealistic, high quality, modern style, no text`;
 
         try {
@@ -184,14 +187,14 @@ export default function PostEditor() {
             successCount++;
           }
         } catch (err) {
-          console.error(`?��?지 ${i + 1} ?�성 ?�패:`, err);
+          console.error(`이미지 ${i + 1} 생성 실패:`, err);
         }
       }
 
       setContent(newContent);
-      alert(`??${successCount}개의 본문 ?��?지가 ?�생?�되?�습?�다!`);
+      alert(`✅ ${successCount}개의 본문 이미지가 재생성되었습니다!`);
     } catch (err) {
-      alert('?��?지 ?�생??�??�류: ' + err.message);
+      alert('이미지 재생성 중 오류: ' + err.message);
     } finally {
       setSaving(false);
     }
@@ -202,7 +205,7 @@ export default function PostEditor() {
       <AdminLayout>
         <div className="text-center py-20">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">로딩 �?..</p>
+          <p className="text-gray-600">로딩 중...</p>
         </div>
       </AdminLayout>
     );
@@ -212,7 +215,7 @@ export default function PostEditor() {
     <AdminLayout>
       <div className="max-w-6xl mx-auto p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">?�️ ?�스???�집</h1>
+          <h1 className="text-3xl font-bold">✏️ 포스트 편집</h1>
           <div className="flex gap-2">
             <button
               onClick={() => router.push('/admin/dashboard')}
@@ -225,19 +228,19 @@ export default function PostEditor() {
               disabled={saving}
               className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:bg-gray-400"
             >
-              {saving ? '?�??�?..' : '?�� ?�??}
+              {saving ? '저장 중...' : '💾 저장'}
             </button>
           </div>
         </div>
 
-        {/* ?�네???�션 */}
+        {/* 썸네일 섹션 */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4">?���??�네???��?지</h2>
+          <h2 className="text-xl font-bold mb-4">🖼️ 썸네일 이미지</h2>
           <div className="mb-4">
             {thumbnailUrl && (
               <img
                 src={thumbnailUrl}
-                alt="?�네??
+                alt="썸네일"
                 className="w-full max-w-2xl rounded-lg border shadow-sm"
                 onError={(e) => {
                   e.target.src = 'https://picsum.photos/1280/720?random=' + post.id;
@@ -250,7 +253,7 @@ export default function PostEditor() {
               type="text"
               value={thumbnailUrl}
               onChange={(e) => setThumbnailUrl(e.target.value)}
-              placeholder="?�네??URL"
+              placeholder="썸네일 URL"
               className="flex-1 px-4 py-2 border rounded-lg"
             />
             <button
@@ -258,25 +261,26 @@ export default function PostEditor() {
               disabled={saving}
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400"
             >
-              ?�� AI ?�생??            </button>
+              🎨 AI 재생성
+            </button>
           </div>
         </div>
 
-        {/* ?�목 ?�션 */}
+        {/* 제목 섹션 */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4">?�� ?�목</h2>
+          <h2 className="text-xl font-bold mb-4">📝 제목</h2>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="w-full px-4 py-3 border rounded-lg text-lg font-medium"
-            placeholder="블로�??�목"
+            placeholder="블로그 제목"
           />
         </div>
 
-        {/* 카테고리 ?�션 */}
+        {/* 카테고리 섹션 */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4">?�� 카테고리</h2>
+          <h2 className="text-xl font-bold mb-4">📂 카테고리</h2>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
@@ -290,34 +294,36 @@ export default function PostEditor() {
           </select>
         </div>
 
-        {/* 메�? ?�명 ?�션 */}
+        {/* 메타 설명 섹션 */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4">?�� 메�? ?�명 (SEO)</h2>
+          <h2 className="text-xl font-bold mb-4">🔍 메타 설명 (SEO)</h2>
           <textarea
             value={metaDescription}
             onChange={(e) => setMetaDescription(e.target.value)}
             className="w-full px-4 py-2 border rounded-lg"
             rows="3"
-            placeholder="SEO??메�? ?�명 (130-150??"
+            placeholder="SEO용 메타 설명 (130-150자)"
           />
           <p className="text-sm text-gray-500 mt-2">
-            ?�재 {metaDescription.length}??/ 권장 130-150??          </p>
+            현재 {metaDescription.length}자 / 권장 130-150자
+          </p>
         </div>
 
-        {/* 본문 ?�디??*/}
+        {/* 본문 에디터 */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">?�� 본문 ?�용</h2>
+            <h2 className="text-xl font-bold">📄 본문 내용</h2>
             <button
               onClick={regenerateContentImages}
               disabled={saving}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 text-sm"
             >
-              ?���?본문 ?��?지 AI ?�생??            </button>
+              🖼️ 본문 이미지 AI 재생성
+            </button>
           </div>
           <TiptapEditor content={content} onChange={setContent} />
           <p className="text-sm text-gray-500 mt-4">
-            ?�� ?�이�?블로그처???�집?�세?? ?��?지, 링크, ?? ?�영?? ?�식 모두 가?�합?�다.
+            💡 네이버 블로그처럼 편집하세요. 이미지, 링크, 표, 동영상, 서식 모두 가능합니다.
           </p>
         </div>
       </div>
