@@ -375,7 +375,7 @@ export default async function handler(req, res) {
     console.log('[INFO] 데이터베이스에 저장 중...');
     const slug = generateSlug(blogContent.title);
 
-    const post = createPost({
+    const post = await createPost({
       video_id: videoId,
       title: blogContent.title,
       slug: slug,
@@ -387,6 +387,10 @@ export default async function handler(req, res) {
       thumbnail_url: thumbnailUrl,
       status: 'draft',
     });
+
+    if (!post) {
+      throw new Error('데이터베이스 저장에 실패했습니다.');
+    }
 
     console.log('[INFO] 블로그 글 생성 완료:', post.id);
 
