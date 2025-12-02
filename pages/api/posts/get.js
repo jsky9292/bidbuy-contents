@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
     let post;
     if (id) {
-      post = await getPost(parseInt(id));
+      post = await getPost(id);
     } else {
       post = await getPostBySlugAdmin(slug);
     }
