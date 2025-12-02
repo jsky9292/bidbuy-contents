@@ -57,72 +57,105 @@ async function generateBlogContent(videoInfo, viralAnalysis, transcript) {
     ? `바이럴 점수: ${viralAnalysis.viral_score}점 (${viralAnalysis.rating}) - ${viralAnalysis.summary}`
     : '';
 
-  // 랜덤 테마 선택 (bloggogogo 스타일)
-  const themes = [
-    { name: '블루-그레이', primary: '#1a73e8', secondary: '#f5f5f5', accent: '#e8f4fd' },
-    { name: '그린-오렌지', primary: '#00796b', secondary: '#fff3e0', accent: '#e0f2f1' },
-    { name: '퍼플-옐로우', primary: '#6200ea', secondary: '#fffde7', accent: '#f3e5f5' }
-  ];
-  const theme = themes[Math.floor(Math.random() * themes.length)];
+  // 비드바이 teal 테마 (통일된 브랜드 색상)
+  const theme = { name: '비드바이-틸', primary: '#00897b', secondary: '#e0f2f1', accent: '#b2dfdb' };
 
-  // bloggogogo 구글 스타일 프롬프트 (초간결화)
-  const prompt = `YouTube 영상 스크립트 기반 구글 SEO 블로그 작성
+  // 일본 콘텐츠 블로그 프롬프트 (장소 정보 포함)
+  const prompt = `YouTube 영상 스크립트 기반 일본 정보 블로그 작성
 
 📹 영상 정보
 제목: ${videoInfo.title}
 ${viralSummary}
 
-🎬 영상 스크립트 (분석 필수!)
+🎬 영상 스크립트 (핵심 정보 추출 필수!)
 ${transcriptSummary}
 
 🎨 테마: ${theme.name} (색상: ${theme.primary})
 
 ✅ 필수 요구사항
-- 2,500-3,000자 (한글, 공백 포함)
-- ~이에요, ~해요 체
-- 영상 스크립트 내용을 심층 분석하여 재구성
-- 표(table) 1개 이상 필수
-- **중요**: 유튜버/채널명 절대 언급 금지! 마치 내가 직접 경험한 것처럼 작성
-- 예: "곽튜브가 방문한 곳" (X) → "제가 방문한 신혼여행지" (O)
+- 3,000-3,500자 (한글, 공백 포함)
+- ~이에요, ~해요 체 (친근하고 읽기 쉽게)
+- **스크립트에서 실제 장소명, 가게명, 메뉴명, 가격 등 구체적 정보 반드시 추출하여 포함**
+- 유튜버/채널명 절대 언급 금지! 마치 내가 직접 경험한 것처럼 1인칭으로 작성
+- 문단 사이 충분한 여백 (각 p 태그에 margin-bottom: 20px 적용)
 
-📋 HTML 구조
-<div style="font-family: 'Noto Sans KR', sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; font-size: 16px;">
-  <div style="background-color: ${theme.secondary}; padding: 15px; border-radius: 8px; margin-bottom: 25px;"><strong>질문</strong> 설명</div>
-  <p style="margin-bottom: 15px;">도입</p>
-  <h2 style="font-size: 22px; color: ${theme.primary}; margin: 30px 0 15px; border-bottom: 2px solid #eaeaea; padding-bottom: 8px;"><strong>제목</strong></h2>
-  <p style="margin-bottom: 15px;">본문</p>
-  <div style="background-color: ${theme.accent}; border-left: 4px solid ${theme.primary}; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0;"><strong>💡 팁</strong><br>내용</div>
-  <table style="width: 100%; border-collapse: collapse; margin: 20px 0;"><thead><tr style="background-color: #f8f9fa;"><th style="padding: 12px; border: 1px solid #dee2e6;">항목</th></tr></thead><tbody><tr><td style="padding: 12px; border: 1px solid #dee2e6;">내용</td></tr></tbody></table>
-  <h2 style="font-size: 22px; color: ${theme.primary}; margin: 30px 0 15px; border-bottom: 2px solid #eaeaea; padding-bottom: 8px;"><strong>FAQ</strong> ❓</h2>
-  <h3 style="font-size: 18px; margin: 20px 0 10px;">질문?</h3>
-  <p style="margin-bottom: 15px;">답변</p>
+📍 장소 정보 규칙 (매우 중요!)
+- 스크립트에서 언급된 **실제 가게명, 장소명을 정확히** 추출
+- 각 장소마다 아래 정보 박스 포함:
+  <div style="background: #f8f9fa; border-radius: 12px; padding: 20px; margin: 25px 0;">
+    <h4 style="margin: 0 0 10px; color: ${theme.primary};">📍 [장소명]</h4>
+    <p style="margin: 5px 0; font-size: 14px;">📌 주소: [실제 주소 또는 "일본 [지역명] 소재"]</p>
+    <p style="margin: 5px 0; font-size: 14px;">🕐 영업시간: [알 수 있으면 기재, 없으면 "현지 확인 필요"]</p>
+    <p style="margin: 5px 0; font-size: 14px;">💰 가격대: [메뉴 가격 정보]</p>
+    <p style="margin: 5px 0; font-size: 14px;">⭐ 추천 메뉴: [대표 메뉴]</p>
+  </div>
+
+📋 HTML 구조 (문단 간격 넓게!)
+<div style="font-family: 'Noto Sans KR', sans-serif; line-height: 1.9; max-width: 800px; margin: 0 auto; font-size: 17px; color: #333;">
+  <div style="background: linear-gradient(135deg, ${theme.secondary}, #fff); padding: 20px; border-radius: 12px; margin-bottom: 30px;"><strong>🤔 [호기심 유발 질문]</strong><br><span style="color: #666;">[질문에 대한 간단한 답변 미리보기]</span></div>
+
+  <p style="margin-bottom: 20px; line-height: 1.9;">[도입 - 왜 이 장소/음식에 관심을 갖게 됐는지]</p>
+
+  {{IMAGE_1}}
+
+  <h2 style="font-size: 24px; color: ${theme.primary}; margin: 40px 0 20px; border-bottom: 3px solid ${theme.primary}; padding-bottom: 10px;"><strong>[섹션1 제목]</strong></h2>
+  <p style="margin-bottom: 20px; line-height: 1.9;">[본문 - 구체적인 경험 설명]</p>
+
+  [장소 정보 박스]
+
+  {{IMAGE_2}}
+
+  <h2 style="font-size: 24px; color: ${theme.primary}; margin: 40px 0 20px; border-bottom: 3px solid ${theme.primary}; padding-bottom: 10px;"><strong>[섹션2 제목]</strong></h2>
+  <p style="margin-bottom: 20px; line-height: 1.9;">[본문]</p>
+
+  <div style="background-color: ${theme.accent}; border-left: 4px solid ${theme.primary}; padding: 20px; margin: 30px 0; border-radius: 0 12px 12px 0;"><strong>💡 꿀팁!</strong><br>[실용적인 팁 - 가는 방법, 주문 방법, 주의사항 등]</div>
+
+  <table style="width: 100%; border-collapse: collapse; margin: 30px 0; border-radius: 8px; overflow: hidden;">
+    <thead><tr style="background-color: ${theme.primary}; color: white;"><th style="padding: 15px; border: 1px solid #dee2e6;">[항목]</th><th style="padding: 15px; border: 1px solid #dee2e6;">[내용]</th></tr></thead>
+    <tbody><tr><td style="padding: 15px; border: 1px solid #dee2e6;">[데이터]</td><td style="padding: 15px; border: 1px solid #dee2e6;">[데이터]</td></tr></tbody>
+  </table>
+
+  {{IMAGE_3}}
+
+  <h2 style="font-size: 24px; color: ${theme.primary}; margin: 40px 0 20px; border-bottom: 3px solid ${theme.primary}; padding-bottom: 10px;"><strong>❓ 자주 묻는 질문</strong></h2>
+  <h3 style="font-size: 18px; margin: 25px 0 10px; color: #444;">Q. [질문1]?</h3>
+  <p style="margin-bottom: 20px; line-height: 1.9;">A. [답변1]</p>
+  <h3 style="font-size: 18px; margin: 25px 0 10px; color: #444;">Q. [질문2]?</h3>
+  <p style="margin-bottom: 20px; line-height: 1.9;">A. [답변2]</p>
+
+  <div style="background: linear-gradient(135deg, ${theme.accent}, #fff); padding: 25px; border-radius: 12px; margin-top: 40px;">
+    <strong>📝 마무리</strong>
+    <p style="margin: 10px 0 0; line-height: 1.9;">[전체 요약 및 추천 멘트]</p>
+  </div>
 </div>
 
-🖼️ 이미지 프롬프트 규칙 (매우 중요!)
-- 이미지 프롬프트는 반드시 본문 내용과 직접 관련된 장면이어야 함
-- 추상적이거나 일반적인 이미지 금지 (예: "modern office" 같은 일반적 표현 금지)
-- 글의 주제, 핵심 키워드, 설명하는 내용을 시각적으로 표현
-- 예시: 보험 청구 글 → "Korean person filling insurance claim form at desk with documents", 여행 글 → "Osaka castle with cherry blossoms tourists taking photos"
+🖼️ 이미지 프롬프트 규칙
+- 스크립트에서 언급된 **실제 음식, 장소, 상황**을 구체적으로 묘사
+- 예: "라멘" → "steaming tonkotsu ramen with chashu pork slices, soft boiled egg, green onions, in a Japanese restaurant, close-up shot, appetizing food photography"
+- 예: "오사카 도톤보리" → "Dotonbori street in Osaka at night, neon signs, Glico running man, canal reflection, vibrant atmosphere"
 
 📤 JSON 출력
 {
-  "title": "SEO 최적화 제목 60자 이내",
-  "meta_description": "메타 설명 130-150자",
-  "content": "위 HTML 구조 + {{IMAGE_1}}, {{IMAGE_2}}, {{IMAGE_3}} 포함 (각 섹션 사이에 배치)",
+  "title": "SEO 최적화 제목 60자 이내 (장소명/음식명 포함)",
+  "meta_description": "메타 설명 130-150자 (핵심 정보 요약)",
+  "content": "위 HTML 구조 (장소 정보 박스 필수 포함)",
   "keywords": ["키워드1", "키워드2", "키워드3", "키워드4", "키워드5", "키워드6", "키워드7", "키워드8"],
   "hashtags": ["해시태그1", "해시태그2", "해시태그3", "해시태그4", "해시태그5", "해시태그6", "해시태그7", "해시태그8", "해시태그9", "해시태그10"],
-  "thumbnail_prompt": "블로그 주제를 대표하는 구체적인 영어 프롬프트, photorealistic, 16:9 aspect ratio, vibrant colors",
+  "places": [
+    {"name": "장소명1", "address": "주소 또는 지역", "type": "restaurant/cafe/attraction/shop"},
+    {"name": "장소명2", "address": "주소 또는 지역", "type": "restaurant/cafe/attraction/shop"}
+  ],
+  "thumbnail_prompt": "메인 주제를 대표하는 구체적 장면, photorealistic, 16:9, vibrant colors, appetizing/beautiful",
   "image_prompts": [
-    "첫번째 섹션 내용과 직접 관련된 구체적 장면 영어 프롬프트",
-    "두번째 섹션 내용과 직접 관련된 구체적 장면 영어 프롬프트",
-    "세번째 섹션 내용과 직접 관련된 구체적 장면 영어 프롬프트"
+    "첫번째 장소/음식의 구체적 묘사 영어 프롬프트",
+    "두번째 장소/음식의 구체적 묘사 영어 프롬프트",
+    "세번째 장소/분위기의 구체적 묘사 영어 프롬프트"
   ]
 }
 
 📌 해시태그 규칙:
-- 10개 생성 (검색 노출용 SEO 해시태그)
-- 본문 주제와 관련된 인기 검색어 포함
-- 예: 일본여행 글 → ["일본여행", "오사카여행", "일본맛집", "오사카맛집", "일본쇼핑", "면세점", "일본교통", "오사카교통", "일본관광", "해외여행"]
+- 10개 생성: 장소명 + 음식명 + 지역명 + 관련 인기 검색어
+- 예: ["오사카맛집", "도톤보리라멘", "일본여행", "오사카여행", "일본라멘", "오사카야식", "일본먹방", "해외맛집", "오사카추천", "일본음식"]
 
 JSON만 출력. 다른 텍스트 금지.`;
 
