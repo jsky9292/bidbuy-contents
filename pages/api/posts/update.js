@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     if (thumbnail_url !== undefined) updates.thumbnail_url = thumbnail_url;
     if (category !== undefined) updates.category = category;
 
-    await updatePost(parseInt(actualId), updates);
+    await updatePost(actualId, updates);
 
     return res.status(200).json({ success: true, message: '포스트가 업데이트되었습니다.' });
   } catch (error) {
