@@ -57,8 +57,16 @@ async function generateBlogContent(videoInfo, viralAnalysis, transcript) {
     ? `바이럴 점수: ${viralAnalysis.viral_score}점 (${viralAnalysis.rating}) - ${viralAnalysis.summary}`
     : '';
 
-  // 비드바이 teal 테마 (통일된 브랜드 색상)
-  const theme = { name: '비드바이-틸', primary: '#00897b', secondary: '#e0f2f1', accent: '#b2dfdb' };
+  // 다양한 테마 색상 (랜덤 선택)
+  const themes = [
+    { name: '틸-민트', primary: '#00897b', secondary: '#e0f2f1', accent: '#b2dfdb' },
+    { name: '블루-스카이', primary: '#1976d2', secondary: '#e3f2fd', accent: '#bbdefb' },
+    { name: '오렌지-웜', primary: '#f57c00', secondary: '#fff3e0', accent: '#ffe0b2' },
+    { name: '퍼플-라벤더', primary: '#7b1fa2', secondary: '#f3e5f5', accent: '#e1bee7' },
+    { name: '그린-포레스트', primary: '#388e3c', secondary: '#e8f5e9', accent: '#c8e6c9' },
+    { name: '레드-코랄', primary: '#d32f2f', secondary: '#ffebee', accent: '#ffcdd2' },
+  ];
+  const theme = themes[Math.floor(Math.random() * themes.length)];
 
   // 일본 콘텐츠 블로그 프롬프트 (장소 정보 포함)
   const prompt = `YouTube 영상 스크립트 기반 일본 정보 블로그 작성
@@ -299,7 +307,7 @@ export default async function handler(req, res) {
     });
   }
 
-  const { videoId, thumbnailPrompt, imagePrompts: userImagePrompts, imageCount = 3 } = req.body;
+  const { videoId, thumbnailPrompt, imagePrompts: userImagePrompts, imageCount = 3, category = 'travel' } = req.body;
 
   if (!videoId) {
     return res.status(400).json({
@@ -430,6 +438,7 @@ export default async function handler(req, res) {
         : String(blogContent.keywords || ''),
       hashtags: hashtags,
       thumbnail_url: thumbnailUrl,
+      category: category,
       status: 'draft',
     });
 

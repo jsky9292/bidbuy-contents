@@ -14,8 +14,7 @@ export default async function handler(req, res) {
   try {
     // 포스트를 삭제 상태로 업데이트
     const updatedPost = await updatePost(postId, {
-      status: 'deleted',
-      deleted_at: new Date().toISOString()
+      status: 'deleted'
     });
 
     return res.status(200).json({

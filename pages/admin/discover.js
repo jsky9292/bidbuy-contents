@@ -175,7 +175,8 @@ export default function Discover() {
       return;
     }
 
-    if (!confirm(`이 영상으로 블로그 글을 생성하시겠습니까?\n\n영상 ID: ${videoId}`)) {
+    const categoryLabel = categories.find(c => c.value === selectedCategory)?.label || selectedCategory;
+    if (!confirm(`이 영상으로 블로그 글을 생성하시겠습니까?\n\n영상 ID: ${videoId}\n카테고리: ${categoryLabel}`)) {
       return;
     }
 
@@ -188,7 +189,7 @@ export default function Discover() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ videoId }),
+        body: JSON.stringify({ videoId, category: selectedCategory }),
       });
 
       const data = await response.json();
@@ -218,6 +219,17 @@ export default function Discover() {
   const [thumbnailPromptInput, setThumbnailPromptInput] = useState('');
   const [imagePrompts, setImagePrompts] = useState(['', '', '', '', '']);
 
+  // 카테고리 선택 상태
+  const [selectedCategory, setSelectedCategory] = useState('travel');
+  const categories = [
+    { value: 'travel', label: '🗾 일본여행' },
+    { value: 'food', label: '🍜 일본음식/맛집' },
+    { value: 'shopping', label: '🛒 쇼핑/구매대행' },
+    { value: 'culture', label: '🎌 일본문화' },
+    { value: 'living', label: '🏠 일본생활' },
+    { value: 'news', label: '📰 일본뉴스/트렌드' },
+  ];
+
   // 생성 진행 상태 모달
   const [showProgressModal, setShowProgressModal] = useState(false);
   const [progressStatus, setProgressStatus] = useState('');
@@ -236,6 +248,7 @@ export default function Discover() {
     setThumbnailPromptInput('');
     setImagePrompts(['', '', '', '', '']);
     setImageCount(3);
+    setSelectedCategory('travel');
 
     try {
       const response = await fetch('/api/get-transcript', {
@@ -321,7 +334,8 @@ export default function Discover() {
           videoId: currentVideoId,
           thumbnailPrompt: thumbnailPromptInput || undefined,
           imagePrompts: validImagePrompts.length > 0 ? validImagePrompts : undefined,
-          imageCount: imageCount
+          imageCount: imageCount,
+          category: selectedCategory
         }),
       });
 
@@ -488,21 +502,46 @@ export default function Discover() {
 
               {/* YouTube URL 직접 입력 모드 */}
               {searchMode === 'youtube' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    YouTube URL 입력 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={youtubeUrl}
-                    onChange={(e) => setYoutubeUrl(e.target.value)}
-                    placeholder="예: https://www.youtube.com/watch?v=VIDEO_ID"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-lg"
-                    required
-                  />
-                  <p className="text-xs text-gray-500 mt-2">
-                    💡 YouTube 영상 URL을 입력하면 바로 블로그 글이 생성됩니다
-                  </p>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      YouTube URL 입력 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={youtubeUrl}
+                      onChange={(e) => setYoutubeUrl(e.target.value)}
+                      placeholder="예: https://www.youtube.com/watch?v=VIDEO_ID"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-lg"
+                      required
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      💡 YouTube 영상 URL을 입력하면 바로 블로그 글이 생성됩니다
+                    </p>
+                  </div>
+
+                  {/* 카테고리 선택 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      카테고리 선택
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {categories.map((cat) => (
+                        <button
+                          key={cat.value}
+                          type="button"
+                          onClick={() => setSelectedCategory(cat.value)}
+                          className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                            selectedCategory === cat.value
+                              ? 'bg-red-600 text-white shadow-md'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {cat.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -906,6 +945,29 @@ export default function Discover() {
                   </>
                 )}
               </div>
+
+              {/* 카테고리 선택 섹션 */}
+              {!loadingScript && currentScript && (
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">📂 카테고리 선택</h3>
+                  <div className="grid grid-cols-3 gap-2">
+                    {categories.map((cat) => (
+                      <button
+                        key={cat.value}
+                        type="button"
+                        onClick={() => setSelectedCategory(cat.value)}
+                        className={`px-4 py-3 rounded-lg font-medium text-sm transition-all ${
+                          selectedCategory === cat.value
+                            ? 'bg-teal-600 text-white shadow-md ring-2 ring-teal-300'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* 이미지 설정 섹션 */}
               {!loadingScript && currentScript && (
