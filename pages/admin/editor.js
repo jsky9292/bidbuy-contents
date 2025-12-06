@@ -15,6 +15,51 @@ export default function PostEditor() {
   const [category, setCategory] = useState('life');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [saving, setSaving] = useState(false);
+  const [places, setPlaces] = useState([]);
+
+  // 본문에서 장소 정보 추출
+  const extractPlaces = (html) => {
+    const placeRegex = /<div[^>]*>[\s\S]*?<h4[^>]*>📍\s*([^<]+)<\/h4>[\s\S]*?📌\s*주소:\s*([^<]+)[\s\S]*?<iframe[^>]*src="[^"]*q=([^"&]+)"[^>]*>/g;
+    const found = [];
+    let match;
+    while ((match = placeRegex.exec(html)) !== null) {
+      found.push({
+        name: match[1].trim(),
+        address: decodeURIComponent(match[3].replace(/\+/g, ' ')),
+        original: match[0]
+      });
+    }
+    return found;
+  };
+
+  // 장소 주소 업데이트
+  const updatePlaceAddress = (index, newAddress) => {
+    const newPlaces = [...places];
+    newPlaces[index].address = newAddress;
+    setPlaces(newPlaces);
+
+    // 본문 HTML에서 해당 장소의 iframe 주소 업데이트
+    let newContent = content;
+    const encodedAddress = encodeURIComponent(newPlaces[index].name + ' ' + newAddress);
+
+    // iframe src의 q= 파라미터 업데이트
+    const iframeRegex = new RegExp(
+      `(<iframe[^>]*src="https://www.google.com/maps/embed/v1/place\\?key=[^"]*&q=)[^"&]+("[^>]*>)`,
+      'g'
+    );
+
+    let count = 0;
+    newContent = newContent.replace(iframeRegex, (match, prefix, suffix) => {
+      if (count === index) {
+        count++;
+        return prefix + encodedAddress + suffix;
+      }
+      count++;
+      return match;
+    });
+
+    setContent(newContent);
+  };
 
   useEffect(() => {
     if (id || slug) {
@@ -34,6 +79,9 @@ export default function PostEditor() {
         setMetaDescription(data.post.meta_description || '');
         setCategory(data.post.category || 'life');
         setThumbnailUrl(data.post.thumbnail_url || '');
+        // 장소 정보 추출
+        const foundPlaces = extractPlaces(data.post.content);
+        setPlaces(foundPlaces);
       }
     } catch (err) {
       console.error('포스트 로드 실패:', err);
@@ -308,6 +356,42 @@ export default function PostEditor() {
             현재 {metaDescription.length}자 / 권장 130-150자
           </p>
         </div>
+
+        {/* 장소 정보 편집 (있을 경우에만 표시) */}
+        {places.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-bold mb-4">📍 장소 정보 편집</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              주소를 수정하면 지도가 자동으로 업데이트됩니다.
+            </p>
+            <div className="space-y-4">
+              {places.map((place, index) => (
+                <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                  <div className="font-medium text-gray-900 mb-2">
+                    {place.name}
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={place.address}
+                      onChange={(e) => updatePlaceAddress(index, e.target.value)}
+                      placeholder="주소 입력 (예: 도쿄 시부야구 1-2-3)"
+                      className="flex-1 px-4 py-2 border rounded-lg"
+                    />
+                    <a
+                      href={`https://www.google.com/maps/search/${encodeURIComponent(place.name + ' ' + place.address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      🗺️ 확인
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 본문 에디터 */}
         <div className="bg-white rounded-lg shadow-md p-6">

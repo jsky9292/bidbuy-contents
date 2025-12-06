@@ -163,6 +163,15 @@ export default function Dashboard({ draftPosts: initialDrafts, publishedPosts: i
             </Link>
           </div>
 
+          {/* 영상 검색 버튼 - 항상 표시 */}
+          <div className="mb-6">
+            <Link href="/admin/discover">
+              <button className="w-full py-4 bg-teal-600 text-white text-lg font-medium rounded-xl hover:bg-teal-700 transition-colors flex items-center justify-center gap-2">
+                🔍 영상 검색하기
+              </button>
+            </Link>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Draft 포스트 */}
             <div>
@@ -173,12 +182,7 @@ export default function Dashboard({ draftPosts: initialDrafts, publishedPosts: i
 
               {draftPosts.length === 0 ? (
                 <div className="bg-white rounded-xl border border-gray-100 p-8 text-center">
-                  <p className="text-gray-400 mb-4">검토할 포스트가 없습니다</p>
-                  <Link href="/admin/discover">
-                    <button className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors">
-                      영상 검색하기
-                    </button>
-                  </Link>
+                  <p className="text-gray-400">검토할 포스트가 없습니다</p>
                 </div>
               ) : (
                 <div className="space-y-3">

@@ -40,6 +40,8 @@ async function getTranscript(videoId) {
  */
 async function generateBlogContent(videoInfo, viralAnalysis, transcript) {
   const GEMINI_API_KEY = getConfigValue('gemini_api_key');
+  // Maps API 키가 없으면 Gemini 키 사용 (같은 프로젝트면 동작)
+  const GOOGLE_MAPS_API_KEY = getConfigValue('google_maps_api_key') || getConfigValue('gemini_api_key');
 
   if (!GEMINI_API_KEY) {
     throw new Error('Gemini API 키가 설정되지 않았습니다. 관리자 설정 페이지에서 API 키를 입력해주세요.');
@@ -57,19 +59,23 @@ async function generateBlogContent(videoInfo, viralAnalysis, transcript) {
     ? `바이럴 점수: ${viralAnalysis.viral_score}점 (${viralAnalysis.rating}) - ${viralAnalysis.summary}`
     : '';
 
-  // 다양한 테마 색상 (랜덤 선택)
+  // 다양한 테마 색상 (랜덤 선택) - 10가지
   const themes = [
-    { name: '틸-민트', primary: '#00897b', secondary: '#e0f2f1', accent: '#b2dfdb' },
-    { name: '블루-스카이', primary: '#1976d2', secondary: '#e3f2fd', accent: '#bbdefb' },
-    { name: '오렌지-웜', primary: '#f57c00', secondary: '#fff3e0', accent: '#ffe0b2' },
-    { name: '퍼플-라벤더', primary: '#7b1fa2', secondary: '#f3e5f5', accent: '#e1bee7' },
-    { name: '그린-포레스트', primary: '#388e3c', secondary: '#e8f5e9', accent: '#c8e6c9' },
-    { name: '레드-코랄', primary: '#d32f2f', secondary: '#ffebee', accent: '#ffcdd2' },
+    { name: '틸-민트', primary: '#00897b', secondary: '#e0f2f1', accent: '#b2dfdb', tableBg: '#e0f2f1' },
+    { name: '블루-스카이', primary: '#1976d2', secondary: '#e3f2fd', accent: '#bbdefb', tableBg: '#e3f2fd' },
+    { name: '오렌지-웜', primary: '#f57c00', secondary: '#fff3e0', accent: '#ffe0b2', tableBg: '#fff3e0' },
+    { name: '퍼플-라벤더', primary: '#7b1fa2', secondary: '#f3e5f5', accent: '#e1bee7', tableBg: '#f3e5f5' },
+    { name: '그린-포레스트', primary: '#388e3c', secondary: '#e8f5e9', accent: '#c8e6c9', tableBg: '#e8f5e9' },
+    { name: '레드-코랄', primary: '#d32f2f', secondary: '#ffebee', accent: '#ffcdd2', tableBg: '#ffebee' },
+    { name: '인디고-나이트', primary: '#3949ab', secondary: '#e8eaf6', accent: '#c5cae9', tableBg: '#e8eaf6' },
+    { name: '핑크-로즈', primary: '#e91e63', secondary: '#fce4ec', accent: '#f8bbd9', tableBg: '#fce4ec' },
+    { name: '브라운-어스', primary: '#795548', secondary: '#efebe9', accent: '#d7ccc8', tableBg: '#efebe9' },
+    { name: '시안-오션', primary: '#0097a7', secondary: '#e0f7fa', accent: '#b2ebf2', tableBg: '#e0f7fa' },
   ];
   const theme = themes[Math.floor(Math.random() * themes.length)];
 
-  // 일본 콘텐츠 블로그 프롬프트 (장소 정보 포함)
-  const prompt = `YouTube 영상 스크립트 기반 일본 정보 블로그 작성
+  // 블로그 프롬프트 (동적 콘텐츠 - 장소 조건부)
+  const prompt = `YouTube 영상 스크립트 기반 블로그 글 작성
 
 📹 영상 정보
 제목: ${videoInfo.title}
@@ -78,92 +84,97 @@ ${viralSummary}
 🎬 영상 스크립트 (핵심 정보 추출 필수!)
 ${transcriptSummary}
 
-🎨 테마: ${theme.name} (색상: ${theme.primary})
+🎨 테마: ${theme.name} (primary: ${theme.primary}, secondary: ${theme.secondary}, accent: ${theme.accent}, tableBg: ${theme.tableBg})
 
 ✅ 필수 요구사항
 - 3,000-3,500자 (한글, 공백 포함)
 - ~이에요, ~해요 체 (친근하고 읽기 쉽게)
-- **스크립트에서 실제 장소명, 가게명, 메뉴명, 가격 등 구체적 정보 반드시 추출하여 포함**
+- **스크립트에서 실제 정보(장소명, 제품명, 가격, 방법 등)를 정확히 추출하여 포함**
 - 유튜버/채널명 절대 언급 금지! 마치 내가 직접 경험한 것처럼 1인칭으로 작성
 - 문단 사이 충분한 여백 (각 p 태그에 margin-bottom: 20px 적용)
 
-📍 장소 정보 규칙 (매우 중요!)
-- 스크립트에서 언급된 **실제 가게명, 장소명을 정확히** 추출
-- 각 장소마다 아래 정보 박스 포함:
-  <div style="background: #f8f9fa; border-radius: 12px; padding: 20px; margin: 25px 0;">
-    <h4 style="margin: 0 0 10px; color: ${theme.primary};">📍 [장소명]</h4>
-    <p style="margin: 5px 0; font-size: 14px;">📌 주소: [실제 주소 또는 "일본 [지역명] 소재"]</p>
-    <p style="margin: 5px 0; font-size: 14px;">🕐 영업시간: [알 수 있으면 기재, 없으면 "현지 확인 필요"]</p>
-    <p style="margin: 5px 0; font-size: 14px;">💰 가격대: [메뉴 가격 정보]</p>
-    <p style="margin: 5px 0; font-size: 14px;">⭐ 추천 메뉴: [대표 메뉴]</p>
+📍 장소 정보 규칙 (조건부 - 중요!)
+- 스크립트에 **실제 방문 가능한 장소(가게, 관광지, 매장 등)가 언급된 경우에만** 장소 정보 박스 포함
+- 장소가 없는 콘텐츠(정보성, 노하우, 리뷰 등)는 장소 박스 생략하고 본문에 집중
+- 장소가 있는 경우 아래 형식 사용 ({{MAPS_KEY}}는 시스템이 자동 치환):
+  <div style="background: ${theme.secondary}; border-radius: 12px; padding: 24px; margin: 25px 0;">
+    <h4 style="margin: 0 0 16px; color: ${theme.primary}; font-size: 18px; font-weight: 600;">[장소명]</h4>
+    <div style="display: grid; gap: 8px; font-size: 14px; color: #555;">
+      <p style="margin: 0;"><span style="color: #888; width: 70px; display: inline-block;">주소</span> [실제 주소]</p>
+      <p style="margin: 0;"><span style="color: #888; width: 70px; display: inline-block;">영업시간</span> [정보 또는 "현지 확인 필요"]</p>
+      <p style="margin: 0;"><span style="color: #888; width: 70px; display: inline-block;">가격대</span> [가격 정보]</p>
+    </div>
+    <div style="margin-top: 16px; border-radius: 8px; overflow: hidden;">
+      <iframe src="https://www.google.com/maps/embed/v1/place?key={{MAPS_KEY}}&q=[장소명+주소를+URL인코딩]" width="100%" height="200" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+    </div>
   </div>
 
-📋 HTML 구조 (문단 간격 넓게!)
+📋 HTML 구조 (깔끔하고 미니멀하게)
 <div style="font-family: 'Noto Sans KR', sans-serif; line-height: 1.9; max-width: 800px; margin: 0 auto; font-size: 17px; color: #333;">
-  <div style="background: linear-gradient(135deg, ${theme.secondary}, #fff); padding: 20px; border-radius: 12px; margin-bottom: 30px;"><strong>🤔 [호기심 유발 질문]</strong><br><span style="color: #666;">[질문에 대한 간단한 답변 미리보기]</span></div>
+  <div style="background: linear-gradient(135deg, ${theme.secondary}, #fff); padding: 20px; border-radius: 12px; margin-bottom: 30px;"><strong>[호기심 유발 질문]</strong><br><span style="color: #666;">[질문에 대한 간단한 답변 미리보기]</span></div>
 
-  <p style="margin-bottom: 20px; line-height: 1.9;">[도입 - 왜 이 장소/음식에 관심을 갖게 됐는지]</p>
+  <p style="margin-bottom: 20px; line-height: 1.9;">[도입 - 왜 이 주제에 관심을 갖게 됐는지]</p>
 
   {{IMAGE_1}}
 
-  <h2 style="font-size: 24px; color: ${theme.primary}; margin: 40px 0 20px; border-bottom: 3px solid ${theme.primary}; padding-bottom: 10px;"><strong>[섹션1 제목]</strong></h2>
-  <p style="margin-bottom: 20px; line-height: 1.9;">[본문 - 구체적인 경험 설명]</p>
+  <h2 style="font-size: 22px; color: ${theme.primary}; margin: 40px 0 20px; padding-bottom: 10px; border-bottom: 2px solid ${theme.accent};">[섹션1 제목]</h2>
+  <p style="margin-bottom: 20px; line-height: 1.9;">[본문 - 구체적인 내용]</p>
 
-  [장소 정보 박스]
+  [장소가 있는 경우에만 장소 정보 박스]
 
   {{IMAGE_2}}
 
-  <h2 style="font-size: 24px; color: ${theme.primary}; margin: 40px 0 20px; border-bottom: 3px solid ${theme.primary}; padding-bottom: 10px;"><strong>[섹션2 제목]</strong></h2>
+  <h2 style="font-size: 22px; color: ${theme.primary}; margin: 40px 0 20px; padding-bottom: 10px; border-bottom: 2px solid ${theme.accent};">[섹션2 제목]</h2>
   <p style="margin-bottom: 20px; line-height: 1.9;">[본문]</p>
 
-  <div style="background-color: ${theme.accent}; border-left: 4px solid ${theme.primary}; padding: 20px; margin: 30px 0; border-radius: 0 12px 12px 0;"><strong>💡 꿀팁!</strong><br>[실용적인 팁 - 가는 방법, 주문 방법, 주의사항 등]</div>
+  <div style="background-color: ${theme.secondary}; padding: 20px; margin: 30px 0; border-radius: 8px;"><strong style="color: ${theme.primary};">Tip</strong><p style="margin: 10px 0 0;">[실용적인 팁]</p></div>
 
   <table style="width: 100%; border-collapse: collapse; margin: 30px 0; border-radius: 8px; overflow: hidden;">
-    <thead><tr style="background-color: ${theme.primary}; color: white;"><th style="padding: 15px; border: 1px solid #dee2e6;">[항목]</th><th style="padding: 15px; border: 1px solid #dee2e6;">[내용]</th></tr></thead>
-    <tbody><tr><td style="padding: 15px; border: 1px solid #dee2e6;">[데이터]</td><td style="padding: 15px; border: 1px solid #dee2e6;">[데이터]</td></tr></tbody>
+    <thead><tr style="background-color: ${theme.primary}; color: white;"><th style="padding: 14px 16px; text-align: left; font-weight: 500;">[항목]</th><th style="padding: 14px 16px; text-align: left; font-weight: 500;">[내용]</th></tr></thead>
+    <tbody>
+      <tr style="background-color: ${theme.tableBg};"><td style="padding: 14px 16px; border-bottom: 1px solid #eee;">[데이터]</td><td style="padding: 14px 16px; border-bottom: 1px solid #eee;">[데이터]</td></tr>
+      <tr style="background-color: white;"><td style="padding: 14px 16px; border-bottom: 1px solid #eee;">[데이터]</td><td style="padding: 14px 16px; border-bottom: 1px solid #eee;">[데이터]</td></tr>
+      <tr style="background-color: ${theme.tableBg};"><td style="padding: 14px 16px;">[데이터]</td><td style="padding: 14px 16px;">[데이터]</td></tr>
+    </tbody>
   </table>
 
   {{IMAGE_3}}
 
-  <h2 style="font-size: 24px; color: ${theme.primary}; margin: 40px 0 20px; border-bottom: 3px solid ${theme.primary}; padding-bottom: 10px;"><strong>❓ 자주 묻는 질문</strong></h2>
-  <h3 style="font-size: 18px; margin: 25px 0 10px; color: #444;">Q. [질문1]?</h3>
-  <p style="margin-bottom: 20px; line-height: 1.9;">A. [답변1]</p>
-  <h3 style="font-size: 18px; margin: 25px 0 10px; color: #444;">Q. [질문2]?</h3>
-  <p style="margin-bottom: 20px; line-height: 1.9;">A. [답변2]</p>
+  <h2 style="font-size: 22px; color: ${theme.primary}; margin: 40px 0 20px; padding-bottom: 10px; border-bottom: 2px solid ${theme.accent};">자주 묻는 질문</h2>
+  <h3 style="font-size: 17px; margin: 25px 0 10px; color: #333; font-weight: 600;">Q. [질문1]?</h3>
+  <p style="margin-bottom: 20px; line-height: 1.9; color: #555;">[답변1]</p>
+  <h3 style="font-size: 17px; margin: 25px 0 10px; color: #333; font-weight: 600;">Q. [질문2]?</h3>
+  <p style="margin-bottom: 20px; line-height: 1.9; color: #555;">[답변2]</p>
 
-  <div style="background: linear-gradient(135deg, ${theme.accent}, #fff); padding: 25px; border-radius: 12px; margin-top: 40px;">
-    <strong>📝 마무리</strong>
-    <p style="margin: 10px 0 0; line-height: 1.9;">[전체 요약 및 추천 멘트]</p>
+  <div style="background: ${theme.secondary}; padding: 24px; border-radius: 12px; margin-top: 40px;">
+    <strong style="color: ${theme.primary};">마무리</strong>
+    <p style="margin: 12px 0 0; line-height: 1.9;">[전체 요약 및 추천 멘트]</p>
   </div>
 </div>
 
 🖼️ 이미지 프롬프트 규칙
-- 스크립트에서 언급된 **실제 음식, 장소, 상황**을 구체적으로 묘사
-- 예: "라멘" → "steaming tonkotsu ramen with chashu pork slices, soft boiled egg, green onions, in a Japanese restaurant, close-up shot, appetizing food photography"
-- 예: "오사카 도톤보리" → "Dotonbori street in Osaka at night, neon signs, Glico running man, canal reflection, vibrant atmosphere"
+- 스크립트에서 언급된 **실제 주제, 상황**을 구체적으로 묘사
+- 영어로 작성, photorealistic 스타일
 
 📤 JSON 출력
 {
-  "title": "SEO 최적화 제목 60자 이내 (장소명/음식명 포함)",
-  "meta_description": "메타 설명 130-150자 (핵심 정보 요약)",
-  "content": "위 HTML 구조 (장소 정보 박스 필수 포함)",
+  "title": "SEO 최적화 제목 60자 이내",
+  "meta_description": "메타 설명 130-150자",
+  "content": "위 HTML 구조",
   "keywords": ["키워드1", "키워드2", "키워드3", "키워드4", "키워드5", "키워드6", "키워드7", "키워드8"],
   "hashtags": ["해시태그1", "해시태그2", "해시태그3", "해시태그4", "해시태그5", "해시태그6", "해시태그7", "해시태그8", "해시태그9", "해시태그10"],
+  "has_places": true/false,
   "places": [
-    {"name": "장소명1", "address": "주소 또는 지역", "type": "restaurant/cafe/attraction/shop"},
-    {"name": "장소명2", "address": "주소 또는 지역", "type": "restaurant/cafe/attraction/shop"}
+    {"name": "장소명", "address": "전체 주소", "type": "restaurant/cafe/attraction/shop"}
   ],
-  "thumbnail_prompt": "메인 주제를 대표하는 구체적 장면, photorealistic, 16:9, vibrant colors, appetizing/beautiful",
-  "image_prompts": [
-    "첫번째 장소/음식의 구체적 묘사 영어 프롬프트",
-    "두번째 장소/음식의 구체적 묘사 영어 프롬프트",
-    "세번째 장소/분위기의 구체적 묘사 영어 프롬프트"
-  ]
+  "thumbnail_prompt": "메인 주제 영어 프롬프트, photorealistic, 16:9",
+  "image_prompts": ["영어 프롬프트1", "영어 프롬프트2", "영어 프롬프트3"]
 }
 
-📌 해시태그 규칙:
-- 10개 생성: 장소명 + 음식명 + 지역명 + 관련 인기 검색어
-- 예: ["오사카맛집", "도톤보리라멘", "일본여행", "오사카여행", "일본라멘", "오사카야식", "일본먹방", "해외맛집", "오사카추천", "일본음식"]
+⚠️ 중요:
+- has_places: 실제 방문 가능한 장소가 있으면 true, 없으면 false
+- places: has_places가 false면 빈 배열 []
+- 장소가 없는 콘텐츠는 장소 박스 없이 본문만 작성
 
 JSON만 출력. 다른 텍스트 금지.`;
 
@@ -254,12 +265,22 @@ JSON만 출력. 다른 텍스트 금지.`;
       htmlContent = htmlContent.replace(/\\"/g, '"');
       htmlContent = htmlContent.replace(/\\n/g, '\n');
 
+      // Google Maps API 키 치환
+      if (GOOGLE_MAPS_API_KEY) {
+        htmlContent = htmlContent.replace(/\{\{MAPS_KEY\}\}/g, GOOGLE_MAPS_API_KEY);
+      } else {
+        // API 키가 없으면 iframe 제거
+        htmlContent = htmlContent.replace(/<div style="margin-top: 15px[^>]*>[\s\S]*?<iframe[^>]*>[\s\S]*?<\/iframe>[\s\S]*?<\/div>/g, '');
+      }
+
       // 기본값 설정
       return {
         title: result.title,
         content: htmlContent,
         meta_description: result.meta_description || result.title.substring(0, 150),
-        keywords: result.keywords || []
+        keywords: result.keywords || [],
+        has_places: result.has_places || false,
+        places: result.places || []
       };
     } catch (parseError) {
       console.error('[ERROR] JSON 파싱 실패:', parseError.message);

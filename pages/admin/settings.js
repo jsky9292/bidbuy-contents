@@ -8,6 +8,7 @@ export default function Settings() {
   const [config, setConfig] = useState({
     youtube_api_key: '',
     gemini_api_key: '',
+    google_maps_api_key: '',
     telegram_bot_token: '',
     telegram_chat_id: '',
     min_views: 10000,
@@ -32,6 +33,7 @@ export default function Settings() {
   const [keyStatus, setKeyStatus] = useState({
     youtube: false,
     gemini: false,
+    google_maps: false,
     telegram: false,
   });
 
@@ -51,6 +53,7 @@ export default function Settings() {
         setConfig({
           youtube_api_key: '',
           gemini_api_key: '',
+          google_maps_api_key: '',
           telegram_bot_token: '',
           telegram_chat_id: data.config.telegram_chat_id || '',
           min_views: data.config.min_views || 10000,
@@ -67,6 +70,7 @@ export default function Settings() {
         setKeyStatus({
           youtube: !!data.config.youtube_api_key,
           gemini: !!data.config.gemini_api_key,
+          google_maps: !!data.config.google_maps_api_key,
           telegram: !!data.config.telegram_bot_token,
         });
       }
@@ -281,6 +285,33 @@ export default function Settings() {
                 className="text-teal-600 hover:underline"
               >
                 Google AI Studio에서 발급 →
+              </a>
+            </p>
+          </div>
+
+          {/* Google Maps API */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Google Maps Embed API 키 (선택사항)
+              {keyStatus.google_maps && <span className="ml-2 text-green-600 text-xs">(저장됨 ✓)</span>}
+            </label>
+            <input
+              type="text"
+              name="google_maps_api_key"
+              value={config.google_maps_api_key}
+              onChange={handleChange}
+              placeholder={keyStatus.google_maps ? "새 키를 입력하면 기존 키가 교체됩니다" : "AIza..."}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              장소 정보에 지도를 표시합니다. 무료로 무제한 사용 가능.{' '}
+              <a
+                href="https://console.cloud.google.com/apis/library/maps-embed-backend.googleapis.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-teal-600 hover:underline"
+              >
+                Maps Embed API 활성화 →
               </a>
             </p>
           </div>
