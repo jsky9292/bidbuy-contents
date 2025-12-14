@@ -92,7 +92,7 @@ ${scraped.content.substring(0, 3000)}
   <h2 style="font-size: 22px; color: ${theme.primary}; margin: 30px 0 15px; border-bottom: 2px solid #eaeaea; padding-bottom: 8px;"><strong>제목</strong></h2>
   <p style="margin-bottom: 15px;">본문</p>
   <div style="background-color: ${theme.accent}; border-left: 4px solid ${theme.primary}; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0;"><strong>💡 팁</strong><br>내용</div>
-  <table style="width: 100%; border-collapse: collapse; margin: 20px 0;"><thead><tr style="background-color: #f8f9fa;"><th style="padding: 12px; border: 1px solid #dee2e6;">항목</th></tr></thead><tbody><tr><td style="padding: 12px; border: 1px solid #dee2e6;">내용</td></tr></tbody></table>
+  <table style="width: 100%; border-collapse: collapse; margin: 20px 0;"><thead><tr style="background-color: ${theme.primary};"><th style="padding: 12px; border: 1px solid #dee2e6; color: white; font-weight: 600;">항목</th></tr></thead><tbody><tr><td style="padding: 12px; border: 1px solid #dee2e6; color: #333;">내용</td></tr></tbody></table>
   <h2 style="font-size: 22px; color: ${theme.primary}; margin: 30px 0 15px; border-bottom: 2px solid #eaeaea; padding-bottom: 8px;"><strong>FAQ</strong> ❓</h2>
   <h3 style="font-size: 18px; margin: 20px 0 10px;">질문?</h3>
   <p style="margin-bottom: 15px;">답변</p>

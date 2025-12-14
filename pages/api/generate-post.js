@@ -130,11 +130,11 @@ ${transcriptSummary}
   <div style="background-color: ${theme.secondary}; padding: 20px; margin: 30px 0; border-radius: 8px;"><strong style="color: ${theme.primary};">Tip</strong><p style="margin: 10px 0 0;">[실용적인 팁]</p></div>
 
   <table style="width: 100%; border-collapse: collapse; margin: 30px 0; border-radius: 8px; overflow: hidden;">
-    <thead><tr style="background-color: ${theme.primary}; color: white;"><th style="padding: 14px 16px; text-align: left; font-weight: 500;">[항목]</th><th style="padding: 14px 16px; text-align: left; font-weight: 500;">[내용]</th></tr></thead>
+    <thead><tr style="background-color: ${theme.primary};"><th style="padding: 14px 16px; text-align: left; font-weight: 600; color: white;">[항목]</th><th style="padding: 14px 16px; text-align: left; font-weight: 600; color: white;">[내용]</th></tr></thead>
     <tbody>
-      <tr style="background-color: ${theme.tableBg};"><td style="padding: 14px 16px; border-bottom: 1px solid #eee;">[데이터]</td><td style="padding: 14px 16px; border-bottom: 1px solid #eee;">[데이터]</td></tr>
-      <tr style="background-color: white;"><td style="padding: 14px 16px; border-bottom: 1px solid #eee;">[데이터]</td><td style="padding: 14px 16px; border-bottom: 1px solid #eee;">[데이터]</td></tr>
-      <tr style="background-color: ${theme.tableBg};"><td style="padding: 14px 16px;">[데이터]</td><td style="padding: 14px 16px;">[데이터]</td></tr>
+      <tr style="background-color: ${theme.tableBg};"><td style="padding: 14px 16px; border-bottom: 1px solid #eee; color: #333;">[데이터]</td><td style="padding: 14px 16px; border-bottom: 1px solid #eee; color: #333;">[데이터]</td></tr>
+      <tr style="background-color: white;"><td style="padding: 14px 16px; border-bottom: 1px solid #eee; color: #333;">[데이터]</td><td style="padding: 14px 16px; border-bottom: 1px solid #eee; color: #333;">[데이터]</td></tr>
+      <tr style="background-color: ${theme.tableBg};"><td style="padding: 14px 16px; color: #333;">[데이터]</td><td style="padding: 14px 16px; color: #333;">[데이터]</td></tr>
     </tbody>
   </table>
 

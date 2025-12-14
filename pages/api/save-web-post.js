@@ -91,19 +91,29 @@ export default async function handler(req, res) {
       }
     }
 
-    // 포스트 데이터 구성
+    // 남은 이미지 플레이스홀더 제거
+    finalContent = finalContent.replace(/\{\{IMAGE_\d+\}\}/g, '');
+
+    // keywords를 문자열로 변환 (generate-post.js와 동일하게)
+    const keywordsStr = Array.isArray(keywords)
+      ? keywords.join(', ')
+      : String(keywords || '');
+
+    // 출처 정보를 content 하단에 추가
+    const contentWithSource = source_url
+      ? `${finalContent}\n<div style="margin-top: 40px; padding: 15px; background: #f5f5f5; border-radius: 8px; font-size: 14px; color: #666;"><strong>참고 자료:</strong> <a href="${source_url}" target="_blank" rel="noopener noreferrer">${source_note || source_url}</a></div>`
+      : finalContent;
+
+    // 포스트 데이터 구성 (DB 스키마에 맞게)
     const postData = {
       title: title.trim(),
       slug: slug,
-      content: finalContent,
+      content: contentWithSource,
       meta_description: meta_description || title.substring(0, 150),
       thumbnail_url: generatedThumbnail,
       status: 'draft',
-      category: category || '일반',
-      keywords: keywords || [],
-      source_type: 'web',
-      source_url: source_url,
-      source_note: source_note,
+      category: category || 'tips',
+      keywords: keywordsStr,
       video_id: null
     };
 
@@ -111,12 +121,21 @@ export default async function handler(req, res) {
       title: postData.title,
       slug: postData.slug,
       category: postData.category,
-      source_url: source_url,
+      keywords: keywordsStr,
       has_thumbnail: !!generatedThumbnail
     });
 
     // DB에 저장
     const savedPost = await createPost(postData);
+
+    // 저장 실패 체크
+    if (!savedPost) {
+      console.error('[웹 포스트] DB 저장 실패 - createPost가 null 반환');
+      return res.status(500).json({
+        success: false,
+        error: '데이터베이스에 저장하는데 실패했습니다. 관리자에게 문의하세요.'
+      });
+    }
 
     return res.status(200).json({
       success: true,
