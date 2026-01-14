@@ -14,6 +14,8 @@ export default function PostEditor() {
   const [metaDescription, setMetaDescription] = useState('');
   const [category, setCategory] = useState('life');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
+  const [hashtags, setHashtags] = useState('');
+  const [keywords, setKeywords] = useState('');
   const [saving, setSaving] = useState(false);
   const [places, setPlaces] = useState([]);
 
@@ -79,6 +81,8 @@ export default function PostEditor() {
         setMetaDescription(data.post.meta_description || '');
         setCategory(data.post.category || 'life');
         setThumbnailUrl(data.post.thumbnail_url || '');
+        setHashtags(data.post.hashtags || '');
+        setKeywords(data.post.keywords || '');
         // 장소 정보 추출
         const foundPlaces = extractPlaces(data.post.content);
         setPlaces(foundPlaces);
@@ -133,7 +137,9 @@ export default function PostEditor() {
           content: processedContent,
           meta_description: metaDescription,
           category,
-          thumbnail_url: thumbnailUrl
+          thumbnail_url: thumbnailUrl,
+          hashtags,
+          keywords
         })
       });
       const data = await res.json();
@@ -394,7 +400,7 @@ export default function PostEditor() {
         )}
 
         {/* 본문 에디터 */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold">📄 본문 내용</h2>
             <button
@@ -409,6 +415,67 @@ export default function PostEditor() {
           <p className="text-sm text-gray-500 mt-4">
             💡 네이버 블로그처럼 편집하세요. 이미지, 링크, 표, 동영상, 서식 모두 가능합니다.
           </p>
+        </div>
+
+        {/* 키워드 섹션 */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-xl font-bold mb-4">🔑 키워드 (SEO)</h2>
+          <input
+            type="text"
+            value={keywords}
+            onChange={(e) => setKeywords(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg"
+            placeholder="키워드를 쉼표(,)로 구분하여 입력 (예: 일본여행, 오사카, 맛집)"
+          />
+          <p className="text-sm text-gray-500 mt-2">
+            검색엔진 최적화를 위한 키워드입니다. 쉼표로 구분해주세요.
+          </p>
+        </div>
+
+        {/* 해시태그 섹션 */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-xl font-bold mb-4"># 해시태그</h2>
+          <textarea
+            value={hashtags}
+            onChange={(e) => setHashtags(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg"
+            rows="3"
+            placeholder="해시태그를 쉼표(,)로 구분하여 입력 (예: 일본여행, 오사카맛집, 도톤보리, 여행꿀팁)"
+          />
+          <p className="text-sm text-gray-500 mt-2">
+            게시물 하단에 표시될 해시태그입니다. 쉼표로 구분해주세요.
+          </p>
+          {hashtags && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {hashtags.split(',').map((tag, idx) => (
+                tag.trim() && (
+                  <span
+                    key={idx}
+                    className="px-3 py-1 bg-teal-50 text-teal-700 rounded-full text-sm"
+                  >
+                    #{tag.trim()}
+                  </span>
+                )
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* 하단 저장 버튼 */}
+        <div className="flex justify-end gap-2 mt-6">
+          <button
+            onClick={() => router.push('/admin/dashboard')}
+            className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+          >
+            취소
+          </button>
+          <button
+            onClick={savePost}
+            disabled={saving}
+            className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:bg-gray-400"
+          >
+            {saving ? '저장 중...' : '💾 저장하기'}
+          </button>
         </div>
       </div>
     </AdminLayout>

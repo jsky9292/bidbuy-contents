@@ -11,13 +11,18 @@ import { useCallback, useEffect } from 'react';
 export default function TiptapEditor({ content, onChange }) {
   const editor = useEditor({
     immediatelyRender: false,
+    parseOptions: {
+      preserveWhitespace: 'full',
+    },
     extensions: [
       StarterKit.configure({
-        // Preserve inline styles and attributes
         paragraph: {
           HTMLAttributes: {
-            style: 'white-space: pre-wrap;',
+            style: 'margin-bottom: 1em;',
           },
+        },
+        hardBreak: {
+          keepMarks: true,
         },
       }),
       Underline,

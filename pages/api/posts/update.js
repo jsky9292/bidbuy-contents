@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { id, postId, title, content, meta_description, thumbnail_url, category } = req.body;
+    const { id, postId, title, content, meta_description, thumbnail_url, category, hashtags, keywords } = req.body;
     const actualId = id || postId;
 
     if (!actualId || !title) {
@@ -28,6 +28,8 @@ export default async function handler(req, res) {
     if (meta_description !== undefined) updates.meta_description = meta_description;
     if (thumbnail_url !== undefined) updates.thumbnail_url = thumbnail_url;
     if (category !== undefined) updates.category = category;
+    if (hashtags !== undefined) updates.hashtags = hashtags;
+    if (keywords !== undefined) updates.keywords = keywords;
 
     await updatePost(actualId, updates);
 
