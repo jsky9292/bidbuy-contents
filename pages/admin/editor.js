@@ -173,7 +173,23 @@ export default function PostEditor() {
       const data = await res.json();
       if (data.success) {
         setThumbnailUrl(data.imageUrl);
-        alert('✅ 썸네일이 생성되었습니다!');
+
+        // 자동으로 DB에 저장
+        const saveRes = await fetch('/api/posts/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: post.id,
+            title,
+            thumbnail_url: data.imageUrl
+          })
+        });
+        const saveData = await saveRes.json();
+        if (saveData.success) {
+          alert('✅ 썸네일이 생성되고 저장되었습니다!');
+        } else {
+          alert('썸네일 생성됨 (저장 실패 - 수동으로 저장해주세요)');
+        }
       } else {
         alert('생성 실패: ' + data.message);
       }
@@ -246,7 +262,24 @@ export default function PostEditor() {
       }
 
       setContent(newContent);
-      alert(`✅ ${successCount}개의 본문 이미지가 재생성되었습니다!`);
+
+      // 자동으로 DB에 저장
+      const processedContent = await convertBase64ToUrl(newContent);
+      const saveRes = await fetch('/api/posts/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: post.id,
+          title,
+          content: processedContent
+        })
+      });
+      const saveData = await saveRes.json();
+      if (saveData.success) {
+        alert(`✅ ${successCount}개의 본문 이미지가 재생성되고 저장되었습니다!`);
+      } else {
+        alert(`${successCount}개 이미지 재생성됨 (저장 실패 - 수동으로 저장해주세요)`);
+      }
     } catch (err) {
       alert('이미지 재생성 중 오류: ' + err.message);
     } finally {

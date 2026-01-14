@@ -63,35 +63,33 @@ export default function Home({ posts }) {
         </div>
       </section>
 
-      {/* 인기 토픽 */}
-      <section className="py-10 bg-gray-50">
-        <div className="max-w-5xl mx-auto px-4">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">인기 토픽</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              { title: '오사카 3박4일 여행 코스', desc: '도톤보리, 유니버셜, 교토까지', image: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400&q=80', href: '/category/travel' },
-              { title: '엔화 환전 타이밍', desc: '환율 저점에 환전하는 방법', image: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400&q=80', href: '/category/exchange' },
-              { title: '야후옥션 입찰 가이드', desc: '처음 시작하는 일본 경매', image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&q=80', href: '/category/proxy' },
-            ].map((topic) => (
-              <Link key={topic.title} href={topic.href}>
-                <div className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-md hover:border-[#4db6ac] transition-all cursor-pointer group">
-                  <div className="relative h-36 overflow-hidden">
-                    <img
-                      src={topic.image}
-                      alt={topic.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
+      {/* 추천 포스트 - 실제 DB에서 가져온 포스트 표시 */}
+      {posts.length >= 3 && (
+        <section className="py-10 bg-gray-50">
+          <div className="max-w-5xl mx-auto px-4">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">추천 포스트</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {posts.slice(0, 3).map((post) => (
+                <Link key={post.id} href={`/posts/${post.slug}`}>
+                  <div className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-md hover:border-[#4db6ac] transition-all cursor-pointer group">
+                    <div className="relative h-36 overflow-hidden">
+                      <img
+                        src={post.thumbnail_url || 'https://images.unsplash.com/photo-1480796927426-f609979314bd?w=400&q=80'}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <div className="font-medium text-gray-900 mb-1 group-hover:text-[#4db6ac] transition-colors line-clamp-1">{post.title}</div>
+                      <div className="text-sm text-gray-500 line-clamp-1">{post.meta_description || '자세한 내용을 확인해보세요'}</div>
+                    </div>
                   </div>
-                  <div className="p-4">
-                    <div className="font-medium text-gray-900 mb-1 group-hover:text-[#4db6ac] transition-colors">{topic.title}</div>
-                    <div className="text-sm text-gray-500">{topic.desc}</div>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 최신 포스트 */}
       <section className="py-8 bg-white">
