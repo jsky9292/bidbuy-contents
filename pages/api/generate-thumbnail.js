@@ -1,10 +1,9 @@
 // pages/api/generate-thumbnail.js
-// Gemini Imagen API를 사용한 AI 썸네일 이미지 생성
+// AI 썸네일 이미지 생성 - Gemini Imagen 또는 Unsplash API
 
 const axios = require('axios');
 const { createClient } = require('@supabase/supabase-js');
 const { getConfigValue } = require('../../lib/config');
-const sharp = require('sharp');
 
 // Supabase 클라이언트
 const supabase = createClient(
@@ -13,41 +12,44 @@ const supabase = createClient(
 );
 
 /**
- * Supabase Storage에 이미지 업로드
+ * Supabase Storage에 이미지 업로드 (URL에서 다운로드 후 업로드)
  */
-async function uploadToStorage(base64Data) {
-  const imageBuffer = Buffer.from(base64Data, 'base64');
-
-  const optimizedBuffer = await sharp(imageBuffer)
-    .resize(1280, 720, { fit: 'cover' })
-    .jpeg({ quality: 70, progressive: true })
-    .toBuffer();
-
-  const fileName = `thumb-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
-
-  const { data, error } = await supabase.storage
-    .from('thumbnails')
-    .upload(fileName, optimizedBuffer, {
-      contentType: 'image/jpeg',
-      upsert: true
+async function uploadImageFromUrl(imageUrl) {
+  try {
+    const response = await axios.get(imageUrl, {
+      responseType: 'arraybuffer',
+      timeout: 30000
     });
 
-  if (error) {
-    console.error('[ERROR] Storage 업로드 실패:', error);
-    throw error;
+    const imageBuffer = Buffer.from(response.data);
+    const fileName = `thumb-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+
+    const { data, error } = await supabase.storage
+      .from('thumbnails')
+      .upload(fileName, imageBuffer, {
+        contentType: 'image/jpeg',
+        upsert: true
+      });
+
+    if (error) {
+      console.error('[ERROR] Storage 업로드 실패:', error);
+      return imageUrl; // 업로드 실패시 원본 URL 반환
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('thumbnails')
+      .getPublicUrl(fileName);
+
+    console.log('[INFO] Storage 업로드 성공:', urlData.publicUrl);
+    return urlData.publicUrl;
+  } catch (err) {
+    console.error('[WARN] 이미지 업로드 실패, 원본 URL 사용:', err.message);
+    return imageUrl;
   }
-
-  const { data: urlData } = supabase.storage
-    .from('thumbnails')
-    .getPublicUrl(fileName);
-
-  console.log('[INFO] Storage 업로드 성공:', urlData.publicUrl);
-  return urlData.publicUrl;
 }
 
 /**
- * Gemini로 AI 이미지 생성 - 2025 최신 모델
- * Nano Banana Pro (gemini-3-pro-image-preview) > Nano Banana (gemini-2.5-flash-image)
+ * Gemini로 AI 이미지 생성 (Imagen 3.0)
  */
 async function generateImageWithGemini(postTitle, thumbnailPrompt) {
   const GEMINI_API_KEY = getConfigValue('gemini_api_key');
@@ -57,157 +59,145 @@ async function generateImageWithGemini(postTitle, thumbnailPrompt) {
   }
 
   try {
-    console.log('[INFO] Gemini 이미지 생성 시작');
+    console.log('[INFO] Gemini Imagen 이미지 생성 시작');
 
     const imagePrompt = thumbnailPrompt
-      ? `${thumbnailPrompt}, photorealistic, 1280x720 resolution, optimized for web, 16:9 aspect ratio, no text overlay`
-      : `Professional blog thumbnail about: ${postTitle}. Photorealistic, modern style, 1280x720 resolution, optimized for web, 16:9 aspect ratio, no text`;
+      ? `${thumbnailPrompt}, high quality photography, 16:9 aspect ratio`
+      : `Professional blog thumbnail about: ${postTitle}. High quality photography, modern style, 16:9 aspect ratio`;
 
     console.log('[INFO] 이미지 생성 프롬프트:', imagePrompt);
 
-    // 2025년 최신 Gemini 이미지 모델 (우선순위 순)
-    const models = [
-      'gemini-3-pro-image-preview',    // Nano Banana Pro - 최고 품질 (4096px)
-      'gemini-2.5-flash-image',         // Nano Banana - 빠른 생성 (1024px)
-      'gemini-2.0-flash-exp-image-generation'  // 레거시 폴백
-    ];
-
-    let lastError;
-
-    for (const model of models) {
-      try {
-        console.log(`[INFO] ${model} 모델로 이미지 생성 시도...`);
-
-        const response = await axios.post(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
-          {
-            contents: [{
-              parts: [{ text: `Generate a high-quality image: ${imagePrompt}` }]
-            }],
-            generationConfig: {
-              responseModalities: ['IMAGE', 'TEXT']
-            }
-          },
-          {
-            timeout: 90000,
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-
-        console.log(`[DEBUG] ${model} 응답 상태:`, response.status);
-
-        // 이미지 응답 확인
-        if (response.data?.candidates?.[0]?.content?.parts) {
-          const parts = response.data.candidates[0].content.parts;
-          for (const part of parts) {
-            if (part.inlineData?.mimeType?.startsWith('image/')) {
-              const base64Image = part.inlineData.data;
-              console.log(`[INFO] ${model} 이미지 생성 성공! (${part.inlineData.mimeType})`);
-              // Supabase Storage에 업로드하고 URL 반환
-              return await uploadToStorage(base64Image);
-            }
-          }
-          console.log(`[WARN] ${model}: 응답에 이미지 없음, parts:`, parts.map(p => Object.keys(p)));
-        } else {
-          console.log(`[WARN] ${model}: candidates 없음`);
+    // Imagen 3.0 모델 사용
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${GEMINI_API_KEY}`,
+      {
+        instances: [{ prompt: imagePrompt }],
+        parameters: {
+          sampleCount: 1,
+          aspectRatio: '16:9',
+          safetyFilterLevel: 'block_few'
         }
-      } catch (err) {
-        const errorMsg = err.response?.data?.error?.message || err.message;
-        console.log(`[WARN] ${model} 실패:`, errorMsg);
-        lastError = err;
-
-        // 모델이 없는 경우 다음 모델로
-        if (errorMsg.includes('not found') || errorMsg.includes('does not exist')) {
-          continue;
-        }
+      },
+      {
+        timeout: 60000,
+        headers: { 'Content-Type': 'application/json' }
       }
+    );
+
+    if (response.data?.predictions?.[0]?.bytesBase64Encoded) {
+      const base64Image = response.data.predictions[0].bytesBase64Encoded;
+      console.log('[INFO] Imagen 이미지 생성 성공!');
+
+      // base64를 Supabase에 업로드
+      const imageBuffer = Buffer.from(base64Image, 'base64');
+      const fileName = `thumb-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+
+      const { data, error } = await supabase.storage
+        .from('thumbnails')
+        .upload(fileName, imageBuffer, {
+          contentType: 'image/jpeg',
+          upsert: true
+        });
+
+      if (error) throw error;
+
+      const { data: urlData } = supabase.storage
+        .from('thumbnails')
+        .getPublicUrl(fileName);
+
+      return urlData.publicUrl;
     }
 
-    throw lastError || new Error('모든 Gemini 이미지 모델 실패');
+    throw new Error('Imagen 응답에 이미지 없음');
   } catch (error) {
-    console.error('[ERROR] Gemini 이미지 생성 실패:', error.message);
+    console.error('[ERROR] Gemini Imagen 실패:', error.response?.data?.error?.message || error.message);
     throw error;
   }
 }
 
 /**
- * 영어 프롬프트에서 Unsplash 검색용 키워드 추출
+ * 키워드 추출
  */
-function extractKeywordsFromPrompt(text) {
-  const englishKeywords = text.match(/\b[a-zA-Z]{4,}\b/g) || [];
-  const stopWords = ['with', 'that', 'this', 'from', 'have', 'been', 'will', 'would', 'could', 'should', 'being', 'their', 'about', 'which', 'when', 'there', 'your', 'more', 'some', 'very', 'just', 'into', 'over', 'such', 'only', 'other', 'than', 'then', 'also', 'back', 'after', 'most', 'made', 'make', 'like', 'image', 'photo', 'style', 'aspect', 'ratio', 'high', 'quality', 'vibrant', 'colors', 'photorealistic', 'modern', 'professional'];
-  const filtered = englishKeywords.filter(w => !stopWords.includes(w.toLowerCase()));
+function extractKeywords(text) {
+  const keywordMap = {
+    '여행': 'japan travel',
+    '맛집': 'japanese food restaurant',
+    '일본': 'japan',
+    '오사카': 'osaka japan',
+    '교토': 'kyoto temple',
+    '도쿄': 'tokyo city',
+    '환율': 'currency money',
+    '엔화': 'japanese yen',
+    '쇼핑': 'shopping store',
+    '구매대행': 'shopping package',
+    '문화': 'japanese culture',
+    '뉴스': 'japan news',
+    '카페': 'japanese cafe',
+    '패션': 'japanese fashion',
+    '기술': 'technology'
+  };
 
-  if (filtered.length >= 2) {
-    console.log('[INFO] 프롬프트에서 추출한 키워드:', filtered.slice(0, 3).join(','));
-    return filtered.slice(0, 3).join(',');
+  for (const [korean, english] of Object.entries(keywordMap)) {
+    if (text.includes(korean)) {
+      return english;
+    }
   }
 
-  return extractKeywords(text);
+  return 'japan travel';
 }
 
 /**
- * Fallback: Unsplash API로 관련 이미지 검색
+ * Unsplash 이미지 검색 (API 사용)
  */
-function extractKeywords(title) {
-  const keywordMap = {
-    '여행': 'travel',
-    '맛집': 'food',
-    '일본': 'japan',
-    '오사카': 'osaka',
-    '교토': 'kyoto',
-    '도쿄': 'tokyo',
-    '보험': 'insurance',
-    '손해사정': 'insurance claim',
-    '건강': 'health',
-    '운동': 'fitness',
-    '요리': 'cooking',
-    '카페': 'cafe',
-    '레스토랑': 'restaurant',
-    '패션': 'fashion',
-    '뷰티': 'beauty',
-    '기술': 'technology',
-    '리뷰': 'review',
-    '가이드': 'guide',
-    '팁': 'tips'
-  };
+async function generateImageWithUnsplash(postTitle, thumbnailPrompt) {
+  const UNSPLASH_ACCESS_KEY = getConfigValue('unsplash_access_key');
 
-  const foundKeywords = [];
-  Object.keys(keywordMap).forEach(korean => {
-    if (title.includes(korean)) {
-      foundKeywords.push(keywordMap[korean]);
+  const searchText = thumbnailPrompt || postTitle;
+  const keywords = extractKeywords(searchText);
+
+  console.log('[INFO] Unsplash 검색 키워드:', keywords);
+
+  // Unsplash API 키가 있으면 API 사용
+  if (UNSPLASH_ACCESS_KEY) {
+    try {
+      const response = await axios.get('https://api.unsplash.com/search/photos', {
+        params: {
+          query: keywords,
+          orientation: 'landscape',
+          per_page: 1
+        },
+        headers: {
+          'Authorization': `Client-ID ${UNSPLASH_ACCESS_KEY}`
+        },
+        timeout: 10000
+      });
+
+      if (response.data?.results?.[0]?.urls?.regular) {
+        const imageUrl = response.data.results[0].urls.regular;
+        console.log('[INFO] Unsplash API 이미지 찾음:', imageUrl);
+        return await uploadImageFromUrl(imageUrl);
+      }
+    } catch (err) {
+      console.error('[WARN] Unsplash API 실패:', err.message);
     }
-  });
-
-  if (foundKeywords.length === 0) {
-    foundKeywords.push('modern', 'blog', 'content');
   }
 
-  return foundKeywords.slice(0, 3).join(',');
+  // Unsplash API 없으면 Lorem Picsum 사용
+  return generateImageWithPicsum(keywords);
 }
 
-async function generateImageWithUnsplash(postTitle, thumbnailPrompt) {
-  try {
-    console.log('[INFO] Fallback: Unsplash API로 이미지 검색');
-    const searchText = thumbnailPrompt || postTitle;
-    const keywords = extractKeywordsFromPrompt(searchText);
-    const uniqueId = Date.now();
+/**
+ * Lorem Picsum 이미지 (최종 폴백)
+ */
+async function generateImageWithPicsum(keywords) {
+  const seed = keywords.replace(/\s+/g, '-').substring(0, 20);
+  const uniqueId = Date.now();
+  const imageUrl = `https://picsum.photos/seed/${seed}-${uniqueId}/1280/720`;
 
-    const response = await axios.get(
-      `https://source.unsplash.com/1280x720/?${keywords}`,
-      { timeout: 10000, maxRedirects: 5 }
-    );
+  console.log('[INFO] Picsum 이미지 URL:', imageUrl);
 
-    const imageUrl = response.request?.res?.responseUrl || `https://source.unsplash.com/1280x720/?${keywords}&sig=${uniqueId}`;
-    console.log('[INFO] Unsplash 이미지 URL:', imageUrl);
-    return imageUrl;
-  } catch (error) {
-    console.error('[WARN] Unsplash 실패:', error.message);
-    const uniqueId = Date.now();
-    return `https://picsum.photos/seed/${uniqueId}/1280/720`;
-  }
+  // Supabase에 업로드하여 영구 저장
+  return await uploadImageFromUrl(imageUrl);
 }
 
 export default async function handler(req, res) {
@@ -230,11 +220,12 @@ export default async function handler(req, res) {
   console.log(`[INFO] 썸네일 생성 시작 - 제목: ${postTitle}`);
 
   try {
-    // 1차 시도: Gemini로 AI 이미지 생성
     let imageUrl;
+
+    // 1차 시도: Gemini Imagen
     try {
       imageUrl = await generateImageWithGemini(postTitle, thumbnailPrompt);
-      console.log('[INFO] Gemini AI 썸네일 생성 완료');
+      console.log('[INFO] Gemini Imagen 썸네일 생성 완료');
 
       return res.status(200).json({
         success: true,
@@ -244,26 +235,29 @@ export default async function handler(req, res) {
       });
     } catch (geminiError) {
       console.log('[WARN] Gemini 실패, Unsplash로 전환:', geminiError.message);
-
-      // 2차 시도: Unsplash로 이미지 검색
-      imageUrl = await generateImageWithUnsplash(postTitle, thumbnailPrompt);
-      console.log('[INFO] Unsplash 썸네일 생성 완료');
-
-      return res.status(200).json({
-        success: true,
-        imageUrl,
-        message: '썸네일이 생성되었습니다!',
-        method: 'unsplash'
-      });
     }
+
+    // 2차 시도: Unsplash API 또는 Picsum
+    imageUrl = await generateImageWithUnsplash(postTitle, thumbnailPrompt);
+    console.log('[INFO] 대체 썸네일 생성 완료');
+
+    return res.status(200).json({
+      success: true,
+      imageUrl,
+      message: '썸네일이 생성되었습니다!',
+      method: 'unsplash'
+    });
+
   } catch (error) {
     console.error('[ERROR] 썸네일 생성 완전 실패:', error.message);
 
-    // 3차 시도: 플레이스홀더 반환
+    // 최종 폴백: 기본 이미지
     const uniqueId = Date.now();
+    const fallbackUrl = `https://picsum.photos/seed/bidbuy-${uniqueId}/1280/720`;
+
     return res.status(200).json({
       success: true,
-      imageUrl: `https://picsum.photos/seed/${uniqueId}/1280/720`,
+      imageUrl: fallbackUrl,
       message: '기본 썸네일이 생성되었습니다',
       method: 'placeholder'
     });
