@@ -22,8 +22,21 @@ export default function Navbar() {
           {/* 로고 */}
           <Link href="/" className="flex items-center gap-2">
             <span className="text-2xl font-bold italic text-[#4db6ac]">Bidbuy</span>
-            <span className="text-xs text-gray-400 hidden sm:block">Japan Contents</span>
+            <span className="text-xs text-gray-400 hidden sm:block">콘텐츠</span>
           </Link>
+
+          {/* 본사이트 링크 */}
+          <a
+            href="https://www.bidbuy.co.kr"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden lg:flex items-center gap-1 text-xs text-gray-500 hover:text-[#00897b] ml-2 px-2 py-1 border border-gray-200 rounded-full"
+          >
+            <span>구매대행 바로가기</span>
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
 
           {/* 검색바 (데스크톱) */}
           <div className="hidden md:flex flex-1 max-w-md mx-8">
@@ -124,12 +137,23 @@ export default function Navbar() {
                 {item.name}
               </Link>
             ))}
-            <div className="pt-2 border-t mt-2">
-              <Link href="/contact" onClick={() => setMobileMenuOpen(false)}>
-                <div className="mt-2 px-3 py-2.5 bg-[#4db6ac] text-white text-center rounded-lg font-medium">
-                  구매대행 신청하기
-                </div>
-              </Link>
+            <div className="pt-2 border-t mt-2 space-y-2">
+              <a
+                href="https://www.bidbuy.co.kr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block px-3 py-2.5 bg-[#00897b] text-white text-center rounded-lg font-medium"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                비드바이 구매대행 바로가기 →
+              </a>
+              <a
+                href="tel:1544-5224"
+                className="block px-3 py-2.5 bg-gray-100 text-gray-700 text-center rounded-lg font-medium"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                📞 1544-5224
+              </a>
             </div>
           </div>
         </div>

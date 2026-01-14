@@ -1,132 +1,151 @@
 // pages/about.js
-// 토스/뱅크샐러드 스타일 소개 페이지
+// 비드바이 콘텐츠 소개 페이지
 
 import Layout from '../components/Layout';
 import Link from 'next/link';
 
 export default function About() {
   return (
-    <Layout title="소개" description="보담 - 손해사정사가 직접 운영하는 보험 정보 블로그입니다.">
+    <Layout title="소개" description="비드바이 콘텐츠 - 일본 구매대행 전문 비드바이에서 운영하는 정보 채널입니다.">
       <div className="max-w-2xl mx-auto px-4 py-12 md:py-16">
         {/* 헤더 */}
         <div className="text-center mb-12">
-          <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">보</span>
+          <div className="w-16 h-16 bg-[#00897b] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <span className="text-white font-bold text-2xl italic">B</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">보담</h1>
-          <p className="text-gray-500">보험을 담다, 당신의 권리를 담다</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">비드바이 콘텐츠</h1>
+          <p className="text-gray-500">일본 구매대행 & 해외직구 정보 채널</p>
         </div>
 
         {/* 소개 */}
         <div className="space-y-8">
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="font-semibold text-gray-900 mb-4">왜 보담인가요?</h2>
+            <h2 className="font-semibold text-gray-900 mb-4">비드바이 콘텐츠란?</h2>
             <div className="space-y-4 text-gray-600 text-sm leading-relaxed">
               <p>
-                보험금 청구, 어렵고 복잡하게 느껴지시나요?<br />
-                보험사에서 제시하는 금액이 적정한지 모르겠나요?<br />
-                거절당한 보험금, 정말 받을 수 없는 걸까요?
+                일본 상품 구매, 어렵고 복잡하게 느껴지시나요?<br />
+                야후옥션, 메루카리에서 원하는 상품을 찾았는데 어떻게 구매해야 할지 모르겠나요?<br />
+                해외직구 배송비와 관세, 제대로 알고 계신가요?
               </p>
               <p>
-                <strong className="text-gray-900">보담</strong>은 현직 손해사정사가 직접 운영하는 보험 정보 블로그입니다.
-                15년 이상의 실무 경험을 바탕으로, 보험사가 알려주지 않는 정보를 제공합니다.
+                <strong className="text-gray-900">비드바이 콘텐츠</strong>는
+                일본 구매대행 전문 기업 <strong className="text-[#00897b]">비드바이(bidbuy.co.kr)</strong>에서
+                운영하는 공식 정보 채널입니다.
               </p>
               <p>
-                인터넷의 많은 보험 정보 중 상당수는 부정확하거나, 실제 청구에 도움이 되지 않습니다.
-                보담은 <strong className="text-gray-900">고객 입장</strong>에서,
-                <strong className="text-gray-900"> 실전에서 통하는</strong> 정보만 전달합니다.
+                10년 이상의 구매대행 경험을 바탕으로, 일본 여행 정보, 환율 동향,
+                해외직구 가이드, 일본 문화 소식 등 유용한 정보를 제공합니다.
               </p>
             </div>
           </div>
 
-          {/* 차별점 */}
+          {/* 비드바이 서비스 */}
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="font-semibold text-gray-900 mb-4">보담의 차별점</h2>
+            <h2 className="font-semibold text-gray-900 mb-4">비드바이 서비스</h2>
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-gray-50 rounded-xl">
-                <h3 className="font-medium text-gray-900 mb-1 text-sm">전문 자격</h3>
+              <div className="p-4 bg-[#e0f2f1] rounded-xl">
+                <h3 className="font-medium text-gray-900 mb-1 text-sm">🇯🇵 일본 야후옥션</h3>
                 <p className="text-xs text-gray-500">
-                  손해사정사 자격 보유 전문가가 직접 작성
+                  일본 최대 경매 사이트 대행
                 </p>
               </div>
-              <div className="p-4 bg-gray-50 rounded-xl">
-                <h3 className="font-medium text-gray-900 mb-1 text-sm">실무 경험</h3>
+              <div className="p-4 bg-[#e0f2f1] rounded-xl">
+                <h3 className="font-medium text-gray-900 mb-1 text-sm">📱 메루카리 대행</h3>
                 <p className="text-xs text-gray-500">
-                  수천 건의 보험금 청구 사례 처리 경험
+                  일본 중고거래 앱 구매 대행
                 </p>
               </div>
-              <div className="p-4 bg-gray-50 rounded-xl">
-                <h3 className="font-medium text-gray-900 mb-1 text-sm">고객 편</h3>
+              <div className="p-4 bg-[#e0f2f1] rounded-xl">
+                <h3 className="font-medium text-gray-900 mb-1 text-sm">🇺🇸 미국/영국 이베이</h3>
                 <p className="text-xs text-gray-500">
-                  보험사가 아닌 고객 입장에서 정보 제공
+                  글로벌 이베이 구매 대행
                 </p>
               </div>
-              <div className="p-4 bg-gray-50 rounded-xl">
-                <h3 className="font-medium text-gray-900 mb-1 text-sm">실제 사례</h3>
+              <div className="p-4 bg-[#e0f2f1] rounded-xl">
+                <h3 className="font-medium text-gray-900 mb-1 text-sm">📦 안전 배송</h3>
                 <p className="text-xs text-gray-500">
-                  이론이 아닌 실제 청구 성공 사례 공개
+                  검수 후 한국까지 안전 배송
                 </p>
               </div>
             </div>
           </div>
 
-          {/* 서비스 */}
+          {/* 콘텐츠 카테고리 */}
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="font-semibold text-gray-900 mb-4">제공 서비스</h2>
+            <h2 className="font-semibold text-gray-900 mb-4">제공 콘텐츠</h2>
             <div className="space-y-3">
-              <div className="flex items-start gap-3 p-3 border border-gray-100 rounded-xl">
-                <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
+              <Link href="/category/travel" className="flex items-start gap-3 p-3 border border-gray-100 rounded-xl hover:border-[#4db6ac] transition-colors">
+                <div className="w-8 h-8 bg-[#e0f2f1] rounded-lg flex items-center justify-center flex-shrink-0">
+                  <span className="text-lg">✈️</span>
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900 text-sm">보험 정보 콘텐츠</h3>
-                  <p className="text-xs text-gray-500">각종 보험 청구 노하우와 정보</p>
+                  <h3 className="font-medium text-gray-900 text-sm">일본 여행 정보</h3>
+                  <p className="text-xs text-gray-500">오사카, 도쿄, 교토 등 일본 여행 가이드</p>
                 </div>
-              </div>
-              <div className="flex items-start gap-3 p-3 border border-gray-100 rounded-xl">
-                <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
+              </Link>
+              <Link href="/category/exchange" className="flex items-start gap-3 p-3 border border-gray-100 rounded-xl hover:border-[#4db6ac] transition-colors">
+                <div className="w-8 h-8 bg-[#e0f2f1] rounded-lg flex items-center justify-center flex-shrink-0">
+                  <span className="text-lg">💴</span>
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900 text-sm">보험금 자가진단</h3>
-                  <p className="text-xs text-gray-500">간단한 퀴즈로 내 보험금 상황 진단</p>
+                  <h3 className="font-medium text-gray-900 text-sm">환율 정보</h3>
+                  <p className="text-xs text-gray-500">엔화/달러 환율 동향과 환전 꿀팁</p>
                 </div>
-              </div>
-              <div className="flex items-start gap-3 p-3 border border-gray-100 rounded-xl">
-                <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                  </svg>
+              </Link>
+              <Link href="/category/proxy" className="flex items-start gap-3 p-3 border border-gray-100 rounded-xl hover:border-[#4db6ac] transition-colors">
+                <div className="w-8 h-8 bg-[#e0f2f1] rounded-lg flex items-center justify-center flex-shrink-0">
+                  <span className="text-lg">🛒</span>
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900 text-sm">무료 상담</h3>
-                  <p className="text-xs text-gray-500">손해사정사의 무료 보험금 검토</p>
+                  <h3 className="font-medium text-gray-900 text-sm">구매대행 가이드</h3>
+                  <p className="text-xs text-gray-500">야후옥션, 메루카리 이용 가이드</p>
                 </div>
-              </div>
+              </Link>
+              <Link href="/category/shopping" className="flex items-start gap-3 p-3 border border-gray-100 rounded-xl hover:border-[#4db6ac] transition-colors">
+                <div className="w-8 h-8 bg-[#e0f2f1] rounded-lg flex items-center justify-center flex-shrink-0">
+                  <span className="text-lg">🛍️</span>
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900 text-sm">일본 쇼핑</h3>
+                  <p className="text-xs text-gray-500">일본 인기 상품과 쇼핑 정보</p>
+                </div>
+              </Link>
             </div>
           </div>
 
           {/* CTA */}
-          <div className="bg-gray-900 rounded-2xl p-6 text-center text-white">
-            <h2 className="font-semibold mb-2">보험금 고민, 혼자 해결하지 마세요</h2>
-            <p className="text-sm text-gray-400 mb-5">
-              무료 상담으로 정확한 보험금 검토를 받아보세요.
+          <div className="bg-gradient-to-r from-[#00897b] to-[#4db6ac] rounded-2xl p-6 text-center text-white">
+            <h2 className="font-semibold mb-2">일본/미국 상품, 비드바이가 대신 구매해드립니다</h2>
+            <p className="text-sm text-white/80 mb-5">
+              야후옥션, 메루카리, 이베이 상품을 한국까지 안전하게 배송!
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/contact">
-                <button className="w-full sm:w-auto px-6 py-2.5 bg-white text-gray-900 rounded-lg font-medium hover:bg-gray-100 transition-colors text-sm">
-                  무료 상담 신청
-                </button>
-              </Link>
-              <Link href="/quiz">
-                <button className="w-full sm:w-auto px-6 py-2.5 bg-gray-700 text-white rounded-lg font-medium hover:bg-gray-600 transition-colors text-sm">
-                  보험금 자가진단
-                </button>
-              </Link>
+              <a
+                href="https://www.bidbuy.co.kr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto px-6 py-2.5 bg-white text-[#00897b] rounded-lg font-medium hover:bg-gray-100 transition-colors text-sm"
+              >
+                비드바이 바로가기 →
+              </a>
+              <a
+                href="tel:1544-5224"
+                className="w-full sm:w-auto px-6 py-2.5 bg-white/20 text-white rounded-lg font-medium hover:bg-white/30 transition-colors text-sm"
+              >
+                📞 1544-5224
+              </a>
+            </div>
+          </div>
+
+          {/* 회사 정보 */}
+          <div className="bg-gray-50 rounded-2xl p-6">
+            <h2 className="font-semibold text-gray-900 mb-4">비드바이 회사 정보</h2>
+            <div className="space-y-2 text-sm text-gray-600">
+              <p><strong className="text-gray-900">상호:</strong> 비드바이 (Bidbuy)</p>
+              <p><strong className="text-gray-900">대표 서비스:</strong> 일본/미국 구매대행</p>
+              <p><strong className="text-gray-900">고객센터:</strong> 1544-5224</p>
+              <p><strong className="text-gray-900">이메일:</strong> korea@bidbuy.co.kr</p>
+              <p><strong className="text-gray-900">홈페이지:</strong> <a href="https://www.bidbuy.co.kr" target="_blank" rel="noopener noreferrer" className="text-[#00897b] hover:underline">www.bidbuy.co.kr</a></p>
             </div>
           </div>
         </div>
