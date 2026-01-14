@@ -20,9 +20,9 @@ export default async function handler(req, res) {
     });
   }
 
-  // 관리자 계정 (하드코딩)
-  const adminUsername = 'bidbuy';
-  const adminPassword = 'bidbuy2024!';
+  // 관리자 계정 (환경변수 사용)
+  const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+  const adminPassword = process.env.ADMIN_PASSWORD || 'admin1234';
 
   if (username === adminUsername && password === adminPassword) {
     // JWT 토큰 생성 (24시간 유효)
