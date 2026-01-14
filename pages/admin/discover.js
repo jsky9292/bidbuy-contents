@@ -239,12 +239,13 @@ export default function Discover() {
   // 카테고리 선택 상태
   const [selectedCategory, setSelectedCategory] = useState('travel');
   const categories = [
-    { value: 'travel', label: '🗾 일본여행' },
-    { value: 'food', label: '🍜 일본음식/맛집' },
-    { value: 'shopping', label: '🛒 쇼핑/구매대행' },
+    { value: 'travel', label: '✈️ 일본여행' },
+    { value: 'exchange', label: '💴 환율정보' },
+    { value: 'proxy', label: '🛒 구매대행' },
+    { value: 'shopping', label: '🛍️ 일본쇼핑' },
     { value: 'culture', label: '🎌 일본문화' },
-    { value: 'living', label: '🏠 일본생활' },
-    { value: 'news', label: '📰 일본뉴스/트렌드' },
+    { value: 'news', label: '📰 일본뉴스' },
+    { value: 'tips', label: '💡 꿀팁' },
   ];
 
   // 생성 진행 상태 모달
