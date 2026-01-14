@@ -96,17 +96,15 @@ ${transcriptSummary}
 📍 장소 정보 규칙 (조건부 - 중요!)
 - 스크립트에 **실제 방문 가능한 장소(가게, 관광지, 매장 등)가 언급된 경우에만** 장소 정보 박스 포함
 - 장소가 없는 콘텐츠(정보성, 노하우, 리뷰 등)는 장소 박스 생략하고 본문에 집중
-- 장소가 있는 경우 아래 형식 사용 ({{MAPS_KEY}}는 시스템이 자동 치환):
+- 장소가 있는 경우 아래 형식 사용:
   <div style="background: ${theme.secondary}; border-radius: 12px; padding: 24px; margin: 25px 0;">
-    <h4 style="margin: 0 0 16px; color: ${theme.primary}; font-size: 18px; font-weight: 600;">[장소명]</h4>
+    <h4 style="margin: 0 0 16px; color: ${theme.primary}; font-size: 18px; font-weight: 600;">📍 [장소명]</h4>
     <div style="display: grid; gap: 8px; font-size: 14px; color: #555;">
       <p style="margin: 0;"><span style="color: #888; width: 70px; display: inline-block;">주소</span> [실제 주소]</p>
       <p style="margin: 0;"><span style="color: #888; width: 70px; display: inline-block;">영업시간</span> [정보 또는 "현지 확인 필요"]</p>
       <p style="margin: 0;"><span style="color: #888; width: 70px; display: inline-block;">가격대</span> [가격 정보]</p>
     </div>
-    <div style="margin-top: 16px; border-radius: 8px; overflow: hidden;">
-      <iframe src="https://www.google.com/maps/embed/v1/place?key={{MAPS_KEY}}&q=[장소명+주소를+URL인코딩]" width="100%" height="200" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-    </div>
+    <a href="https://www.google.com/maps/search/[장소명+주소를+URL인코딩]" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 16px; padding: 10px 20px; background: ${theme.primary}; color: white; text-decoration: none; border-radius: 8px; font-size: 14px;">🗺️ 지도에서 보기</a>
   </div>
 
 📋 HTML 구조 (깔끔하고 미니멀하게)
