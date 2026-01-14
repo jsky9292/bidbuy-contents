@@ -1,29 +1,11 @@
 // pages/api/social-action.js
-// 좋아요/댓글 API
+// 좋아요/댓글 API - Supabase 사용
 
-const fs = require('fs');
-const path = require('path');
+import { createClient } from '@supabase/supabase-js';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
-const SOCIAL_FILE = path.join(DATA_DIR, 'social.json');
-
-function initSocialFile() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-  if (!fs.existsSync(SOCIAL_FILE)) {
-    fs.writeFileSync(SOCIAL_FILE, JSON.stringify({}, null, 2));
-  }
-}
-
-function getSocialData() {
-  initSocialFile();
-  return JSON.parse(fs.readFileSync(SOCIAL_FILE, 'utf8'));
-}
-
-function saveSocialData(data) {
-  fs.writeFileSync(SOCIAL_FILE, JSON.stringify(data, null, 2));
-}
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function handler(req, res) {
   const { slug } = req.query;
@@ -35,10 +17,33 @@ export default async function handler(req, res) {
   // GET: 소셜 데이터 조회
   if (req.method === 'GET') {
     try {
-      const social = getSocialData();
-      const postSocial = social[slug] || { likes: 0, comments: [] };
-      return res.status(200).json({ success: true, data: postSocial });
+      // 포스트의 like_count 조회
+      const { data: post, error: postError } = await supabase
+        .from('posts')
+        .select('id, like_count')
+        .eq('slug', slug)
+        .single();
+
+      if (postError || !post) {
+        return res.status(200).json({ success: true, data: { likes: 0, comments: [] } });
+      }
+
+      // 해당 포스트의 댓글 조회
+      const { data: comments, error: commentsError } = await supabase
+        .from('comments')
+        .select('id, author, content, created_at')
+        .eq('post_id', post.id)
+        .order('created_at', { ascending: true });
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          likes: post.like_count || 0,
+          comments: comments || []
+        }
+      });
     } catch (error) {
+      console.error('[ERROR] 소셜 데이터 조회 실패:', error);
       return res.status(500).json({ success: false, error: error.message });
     }
   }
@@ -48,32 +53,57 @@ export default async function handler(req, res) {
     const { action, comment, author } = req.body;
 
     try {
-      const social = getSocialData();
+      // 포스트 조회
+      const { data: post, error: postError } = await supabase
+        .from('posts')
+        .select('id, like_count')
+        .eq('slug', slug)
+        .single();
 
-      if (!social[slug]) {
-        social[slug] = { likes: 0, comments: [] };
+      if (postError || !post) {
+        return res.status(404).json({ success: false, error: '포스트를 찾을 수 없습니다' });
       }
 
       if (action === 'like') {
-        social[slug].likes += 1;
-        saveSocialData(social);
-        return res.status(200).json({ success: true, likes: social[slug].likes });
+        // 좋아요 수 증가
+        const newLikeCount = (post.like_count || 0) + 1;
+        const { error: updateError } = await supabase
+          .from('posts')
+          .update({ like_count: newLikeCount })
+          .eq('id', post.id);
+
+        if (updateError) {
+          throw updateError;
+        }
+
+        return res.status(200).json({ success: true, likes: newLikeCount });
       }
 
       if (action === 'comment' && comment) {
+        // 댓글 추가
         const newComment = {
-          id: Date.now(),
+          post_id: post.id,
           author: author || '익명',
           content: comment,
           created_at: new Date().toISOString()
         };
-        social[slug].comments.push(newComment);
-        saveSocialData(social);
-        return res.status(200).json({ success: true, comment: newComment });
+
+        const { data: insertedComment, error: insertError } = await supabase
+          .from('comments')
+          .insert(newComment)
+          .select()
+          .single();
+
+        if (insertError) {
+          throw insertError;
+        }
+
+        return res.status(200).json({ success: true, comment: insertedComment });
       }
 
       return res.status(400).json({ success: false, error: '잘못된 요청입니다' });
     } catch (error) {
+      console.error('[ERROR] 소셜 액션 실패:', error);
       return res.status(500).json({ success: false, error: error.message });
     }
   }
